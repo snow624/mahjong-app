@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>試合一覧</title>
+</head>
+
+<body>
+	<main class="page-container">
+
+		<div class="top-title">
+			<h1>MATCHES</h1>
+			<h3>試合一覧</h3>
+		</div>
+
+		<section th:each="m : ${matches}" class="match-card">
+			<a th:href="@{'/matches/' + ${m.id}}" class="match-link">
+				<div class="match-title" th:text="'第' + ${m.matchNumber} + '回戦'"></div>
+			</a>
+
+			<div th:each="mp : ${playerMap[m.id]}" class="match-player-row">
+				<div class="match-player-rank">
+					<span th:if="${#lists.size(resultMap[m.id]) == 0}">-</span>
+					<span th:each="r : ${resultMap[m.id]}" th:if="${r.player.id == mp.player.id}"
+						th:text="${r.rankOrder}"></span>
+				</div>
+
+				<img class="match-player-icon"
+					th:src="${mp.player.iconPath != null ? mp.player.iconPath : '/images/default.png'}">
+
+				<div>
+					<div class="match-player-name" th:text="${mp.player.name}"></div>
+
+					<div class="match-player-point" th:each="r : ${resultMap[m.id]}"
+						th:if="${r.player.id == mp.player.id}"
+						th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'">
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
+</body>
+
+</html>

@@ -1,0 +1,440 @@
+@charset "UTF-8";
+
+/* =========================
+   0. 共通カラー設定
+========================= */
+:root {
+	--color-bg: #111;
+	--color-text: #fff;
+	--color-card: #222;
+	--color-card-light: #fff;
+	--color-border: #444;
+
+	--color-main-green: #087233;
+	--color-main-red: #d40000;
+
+	--color-nav-bg: #1c1c1c;
+
+	--color-gold: gold;
+	--color-silver: silver;
+	--color-bronze: #cd7f32;
+
+	--color-black: #000;
+}
+
+/* =========================
+   1. 全ページ共通
+========================= */
+body {
+	margin: 0;
+	padding-bottom: 80px;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+	font-family: "Helvetica", sans-serif;
+}
+
+h1 {
+	text-align: center;
+	margin: 20px;
+}
+
+img {
+	border-radius: 50%;
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+}
+
+.page-container {
+	width: min(100%, 640px);
+	margin: 0 auto;
+	padding: 24px 16px 96px;
+}
+
+.top-title {
+	text-align: center;
+	padding: 0 0 20px 0;
+}
+
+.top-title h1 {
+	font-size: 3rem;
+}
+
+.top-title h3 {
+	font-size: .8rem;
+}
+
+/* =========================
+   2. 共通テーブル
+========================= */
+table {
+	width: 80%;
+	margin: auto;
+	border-collapse: collapse;
+	background-color: var(--color-card);
+}
+
+th,
+td {
+	padding: 10px;
+	text-align: center;
+	border-bottom: 1px solid var(--color-border);
+}
+
+th {
+	background-color: #333;
+}
+
+tr:hover {
+	background-color: var(--color-border);
+}
+
+/* =========================
+   3. 下部固定ナビ
+========================= */
+.bottom-nav {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: var(--color-nav-bg);
+	border-top: 1px solid var(--color-border);
+	display: flex;
+	justify-content: space-around;
+	padding: 8px 0;
+	z-index: 1000;
+}
+
+.bottom-nav a {
+	color: var(--color-text);
+	text-decoration: none;
+	font-size: 12px;
+	text-align: center;
+}
+
+.bottom-nav span {
+	display: block;
+	margin-top: 2px;
+}
+
+/* =========================
+   4. ランキング画面
+========================= */
+.main-ranking {
+	padding: 24px 16px 90px;
+}
+
+.ranking-row {
+	display: grid;
+	grid-template-columns: 44px 56px 1fr 80px 70px 60px;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 18px;
+	font-weight: bold;
+}
+
+.rank-badge {
+	background: var(--color-main-green);
+	color: var(--color-text);
+	border-radius: 8px;
+	text-align: center;
+	padding: 8px 0;
+	font-size: 24px;
+}
+
+.ranking-row:first-of-type .rank-badge {
+	background: var(--color-main-red);
+}
+
+.player-icon {
+	width: 52px;
+	height: 52px;
+}
+
+/* =========================
+   5. サブランキング
+========================= */
+.sub-ranking-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 24px;
+	padding: 24px 16px 100px;
+}
+
+.sub-ranking-card {
+	background: var(--color-card-light);
+	color: var(--color-black);
+	border-radius: 16px;
+	padding: 16px;
+}
+
+.sub-ranking-card h2 {
+	text-align: center;
+}
+
+.sub-row {
+	display: grid;
+	grid-template-columns: 36px 42px 1fr 70px;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 0;
+	font-weight: bold;
+}
+
+.sub-row:first-of-type {
+	background: var(--color-main-green);
+	color: var(--color-text);
+	border-radius: 10px;
+	padding: 10px;
+}
+
+.mini-icon {
+	width: 36px;
+	height: 36px;
+}
+
+/* =========================
+   6. 試合一覧
+========================= */
+.match-card {
+	background: #fff;
+	color: #111;
+	border-radius: 18px;
+	padding: 18px;
+	margin-bottom: 24px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+}
+
+.match-title {
+	background: #eee;
+	color: #555;
+	text-align: center;
+	border-radius: 8px;
+	padding: 10px;
+	font-size: 22px;
+	font-weight: 700;
+	margin-bottom: 20px;
+}
+
+.match-player-row {
+	display: grid;
+	grid-template-columns: 44px 72px 1fr;
+	align-items: center;
+	gap: 14px;
+	margin-bottom: 18px;
+}
+
+.match-player-rank {
+	background: #087233;
+	color: #fff;
+	border-radius: 8px;
+	text-align: center;
+	font-size: 24px;
+	font-weight: 700;
+	padding: 8px 0;
+}
+
+.match-player-rank.rank-1 {
+	background: #d40000;
+}
+
+.match-player-icon {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	object-fit: cover;
+	background: #eee;
+}
+
+.match-player-name {
+	font-size: 22px;
+	font-weight: 700;
+}
+
+.match-player-point {
+	font-size: 18px;
+	margin-top: 4px;
+}
+
+/* =========================
+   7. プレイヤー一覧
+========================= */
+.player-card {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	background: #fff;
+	color: #111;
+	border-radius: 16px;
+	padding: 14px 16px;
+	margin-bottom: 14px;
+}
+
+.player-card img {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.player-card-name {
+	flex: 1;
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.player-card-edit {
+	color: #087233;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+
+/* =========================
+   8. プレイヤー編集
+========================= */
+.form-card {
+	background: #fff;
+	color: #111;
+	border-radius: 18px;
+	padding: 24px 18px;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+}
+
+.edit-icon-preview {
+	text-align: center;
+	margin-bottom: 24px;
+}
+
+.edit-icon-preview img {
+	width: 120px;
+	height: 120px;
+	border-radius: 50%;
+	object-fit: cover;
+	background: #eee;
+}
+
+.form-group {
+	margin-bottom: 18px;
+}
+
+.form-group label {
+	display: block;
+	font-weight: 700;
+	margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"] {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 10px;
+	font-size: 16px;
+}
+
+.primary-button {
+	width: 100%;
+	border: none;
+	border-radius: 999px;
+	padding: 14px;
+	background: #087233;
+	color: #fff;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+/* =========================
+   9. プレイヤー登録
+========================= */
+.primary-link-button {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin: 0 0 18px;
+	padding: 14px;
+	border-radius: 999px;
+	background: #087233;
+	color: #fff;
+	text-align: center;
+	text-decoration: none;
+	font-weight: 700;
+}
+
+/* =========================
+   10. プレイヤー削除
+========================= */
+.player-card-delete {
+	color: #d40000;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.danger-button {
+	width: 100%;
+	border: none;
+	border-radius: 999px;
+	padding: 14px;
+	background: #d40000;
+	color: #fff;
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.error-message {
+	color: #d40000;
+	font-weight: 700;
+}
+
+.primary-link-button:hover {
+	opacity: .85;
+}
+
+/* =========================
+   スマホ対応
+========================= */
+@media screen and (max-width: 600px) {
+	table {
+		width: 100%;
+		font-size: 12px;
+	}
+
+	th,
+	td {
+		padding: 6px;
+	}
+
+	img {
+		width: 32px;
+		height: 32px;
+	}
+
+	.ranking-row {
+		grid-template-columns: 36px 44px 1fr;
+		grid-template-areas:
+			"rank icon name"
+			"rank icon point";
+	}
+
+	.rank-badge {
+		grid-area: rank;
+	}
+
+	.player-icon {
+		grid-area: icon;
+	}
+
+	.player-name {
+		grid-area: name;
+	}
+
+	.point {
+		grid-area: point;
+	}
+
+	.diff,
+	.games {
+		font-size: 12px;
+	}
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>登録</title>
+</head>
+
+<body>
+	<main class="page-container">
+		<h1>プレイヤー登録</h1>
+
+		<section class="form-card">
+			<form action="/players" method="post">
+				<div class="form-group">
+					<label>名前</label>
+					<input type="text" name="name" placeholder="名前を入力">
+				</div>
+
+				<button type="submit" class="primary-button">登録する</button>
+			</form>
+		</section>
+	</main>
+
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
+</body>
+
+
+</html>

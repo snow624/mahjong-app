@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>試合詳細</title>
+
+</head>
+
+<body>
+	<main class="page-container">
+
+		<h1 th:text="'第' + ${match.matchNumber} + '試合'"></h1>
+
+		<!-- 合計100000点でなければエラー表示 -->
+		<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+
+		<form action="/matches/result" method="post">
+
+			<input type="hidden" name="matchId" th:value="${match.id}">
+
+			<div th:each="mp : ${players}">
+				<span th:text="${mp.player.name}"></span>
+				<input type="number" name="scores" placeholder="点数入力">
+				<input type="hidden" name="playerIds" th:value="${mp.player.id}">
+			</div>
+
+			<button type="submit">保存</button>
+		</form>
+
+	</main>
+</body>
+<div th:replace="~{fragments/nav :: bottomNav}"></div>
+
+</html>

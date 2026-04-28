@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>ランキング</title>
+</head>
+
+<body>
+	<main class="page-container">
+
+		<section class="main-ranking">
+
+			<div class="top-title">
+				<h1>RANKING</h1>
+				<h3>ランキング</h3>
+			</div>
+
+			<div th:each="r, stat : ${pointRanking}" class="ranking-row">
+				<div class="rank-badge" th:text="${stat.index + 1}"></div>
+				<img class="player-icon" th:src="${r.iconPath}">
+				<div class="player-name" th:text="${r.name}"></div>
+				<div class="point" th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'"></div>
+				<div class="diff" th:text="${#numbers.formatDecimal(r.diff, 1, 1)} + 'pt'"></div>
+				<div class="games" th:text="${r.games} + '/18'"></div>
+			</div>
+		</section>
+
+		<section class="sub-ranking-grid">
+			<div class="sub-ranking-card">
+				<h2>最高スコア</h2>
+				<div th:each="r, stat : ${maxScoreRanking}" class="sub-row">
+					<span th:text="${stat.index + 1}"></span> <img class="mini-icon" th:src="${r.iconPath}"> <span
+						th:text="${r.name}"></span> <strong th:text="${r.maxScore}"></strong>
+				</div>
+			</div>
+
+			<div class="sub-ranking-card">
+				<h2>4着回避率</h2>
+				<div th:each="r, stat : ${avoidLastRanking}" class="sub-row">
+					<span th:text="${stat.index + 1}"></span> <img class="mini-icon" th:src="${r.iconPath}"> <span
+						th:text="${r.name}"></span> <strong
+						th:text="${#numbers.formatDecimal(r.avoidLastRate, 1, 1)} + '%'"></strong>
+				</div>
+			</div>
+
+			<div class="sub-ranking-card">
+				<h2>トップ回数</h2>
+				<div th:each="r, stat : ${topCountRanking}" class="sub-row">
+					<span th:text="${stat.index + 1}"></span> <img class="mini-icon" th:src="${r.iconPath}"> <span
+						th:text="${r.name}"></span> <strong th:text="${r.topCount}"></strong>
+				</div>
+			</div>
+		</section>
+
+	</main>
+</body>
+<div th:replace="~{fragments/nav :: bottomNav}"></div>
+
+</html>

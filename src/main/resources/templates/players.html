@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>プレイヤー一覧</title>
+</head>
+
+<body>
+	<main class="page-container">
+		<div class="top-title">
+			<h1>PRAYER</h1>
+			<h3>選手一覧</h3>
+		</div>
+
+		<a href="/players/new" class="primary-link-button">新規登録</a>
+
+		<div th:each="p : ${players}" class="player-card">
+			<img th:src="${p.iconPath != null ? p.iconPath : '/images/default.png'}">
+			<div class="player-card-name" th:text="${p.name}"></div>
+			<a class="player-card-edit" th:href="@{'/players/' + ${p.id} + '/edit'}">編集</a>
+			<a class="player-card-delete" th:href="@{'/players/' + ${p.id} + '/delete'}">削除</a>
+		</div>
+	</main>
+
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
+</body>
+
+</html>

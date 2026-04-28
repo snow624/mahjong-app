@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>プレイヤー削除</title>
+</head>
+
+<body>
+	<main class="page-container">
+		<h1>プレイヤー削除</h1>
+
+		<section class="form-card">
+			<p>
+				<strong th:text="${player.name}"></strong>
+				を削除しますか？
+			</p>
+
+			<p th:if="${error}" class="error-message" th:text="${error}"></p>
+
+			<form th:action="@{'/players/' + ${player.id} + '/delete'}" method="post">
+				<div class="form-group">
+					<label>削除パスワード</label>
+					<input type="password" name="password" placeholder="パスワードを入力">
+				</div>
+
+				<button type="submit" class="danger-button">削除する</button>
+			</form>
+		</section>
+	</main>
+
+</body>
+<div th:replace="~{fragments/nav :: bottomNav}"></div>
+
+</html>
