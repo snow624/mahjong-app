@@ -1,9 +1,10 @@
 package com.snow.mahjong.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,11 +61,18 @@ public class PlayerController {
 		return "player_edit";
 	}
 
+	//	画像保存
+	@Value("${supabase.url}")
+	private String supabaseUrl;
+
+	@Value("${supabase.service-role-key}")
+	private String supabaseServiceRoleKey;
+
 	@PostMapping("/players/{id}/edit")
 	public String update(
 			@PathVariable Long id,
 			@RequestParam String name,
-			@RequestParam("iconFile") MultipartFile iconFile) throws IOException {
+			@RequestParam("iconFile") MultipartFile iconFile) throws IOException, InterruptedException {
 
 		Player player = playerRepository.findById(id).orElse(null);
 
@@ -72,16 +80,28 @@ public class PlayerController {
 
 		if (!iconFile.isEmpty()) {
 
-			String uploadDir = System.getProperty("user.dir") + "/uploads/icons/";
-
-			Files.createDirectories(Paths.get(uploadDir));
-
 			String fileName = id + "_" + iconFile.getOriginalFilename();
 
-			Path savePath = Paths.get(uploadDir + fileName);
-			iconFile.transferTo(savePath.toFile());
+			String uploadUrl = supabaseUrl
+					+ "/storage/v1/object/icons/"
+					+ fileName;
 
-			player.setIconPath("/uploads/icons/" + fileName);
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(uploadUrl))
+					.header("Authorization", "Bearer " + supabaseServiceRoleKey)
+					.header("apikey", supabaseServiceRoleKey)
+					.header("Content-Type", iconFile.getContentType())
+					.PUT(HttpRequest.BodyPublishers.ofByteArray(iconFile.getBytes()))
+					.build();
+
+			HttpResponse<String> response = HttpClient.newHttpClient()
+					.send(request, HttpResponse.BodyHandlers.ofString());
+
+			if (response.statusCode() >= 400) {
+				throw new IOException("Supabase upload failed: " + response.body());
+			}
+
+			player.setIconPath(supabaseUrl + "/storage/v1/object/public/icons/" + fileName);
 		}
 
 		playerRepository.save(player);
