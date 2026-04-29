@@ -24,7 +24,7 @@ public class RankingController {
 	@Autowired
 	private MatchResultRepository matchResultRepository;
 
-	@GetMapping("/")
+	@GetMapping("/ranking")
 	public String ranking(Model model) {
 
 		List<Player> players = playerRepository.findAll();
