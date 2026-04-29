@@ -107,6 +107,13 @@ public class RankingController {
 		// ポイント順でソート
 		rankingList.sort((a, b) -> Double.compare((Double) b.get("point"), (Double) a.get("point")));
 
+		if (rankingList.isEmpty()) {
+		    model.addAttribute("pointRanking", rankingList);
+		    model.addAttribute("maxScoreRanking", rankingList);
+		    model.addAttribute("avoidLastRanking", rankingList);
+		    model.addAttribute("topCountRanking", rankingList);
+		    return "ranking";
+		}
 		// 1位との差計算
 		double topPoint = (double) rankingList.get(0).get("point");
 

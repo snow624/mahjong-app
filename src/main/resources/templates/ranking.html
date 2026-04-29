@@ -23,6 +23,10 @@
 				<h1>RANKING</h1>
 				<h3>ランキング</h3>
 			</div>
+			
+			<p th:if="${#lists.isEmpty(pointRanking)}">
+			    まだプレイヤーが登録されていません。
+			</p>
 
 			<div th:each="r, stat : ${pointRanking}" class="ranking-row">
 				<div class="rank-badge" th:text="${stat.index + 1}"></div>
