@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- reset css -->
 	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
 	<!-- css -->
@@ -17,56 +18,123 @@
 <body>
 	<main class="page-container">
 
+		<!-- メインランキング -->
 		<section class="main-ranking">
-
 			<div class="top-title">
 				<h1>RANKING</h1>
 				<h3>ランキング</h3>
 			</div>
-			
+
 			<p th:if="${#lists.isEmpty(pointRanking)}">
-			    まだプレイヤーが登録されていません。
+				まだプレイヤーが登録されていません。
 			</p>
+
+			<div class="ranking-header">
+				<div>順位</div>
+				<div></div>
+				<div>名前</div>
+				<div>Pt</div>
+				<div>差</div>
+				<div>試合数</div>
+			</div>
 
 			<div th:each="r, stat : ${pointRanking}" class="ranking-row">
 				<div class="rank-badge" th:text="${stat.index + 1}"></div>
-				<img class="player-icon" th:src="${r.iconPath}">
+
+				<img class="player-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
+
 				<div class="player-name" th:text="${r.name}"></div>
+
 				<div class="point" th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'"></div>
-				<div class="diff" th:text="${#numbers.formatDecimal(r.diff, 1, 1)} + 'pt'"></div>
+
+				<div class="diff" th:text="${stat.index == 0 ? '—' : #numbers.formatDecimal(r.diff, 1, 1) + 'pt'}">
+				</div>
+
 				<div class="games" th:text="${r.games} + '/18'"></div>
 			</div>
 		</section>
 
+		<!-- サブランキング -->
 		<section class="sub-ranking-grid">
+
+			<!-- 最高スコア -->
 			<div class="sub-ranking-card">
 				<h2>最高スコア</h2>
-				<div th:each="r, stat : ${maxScoreRanking}" class="sub-row">
-					<span th:text="${stat.index + 1}"></span> <img class="mini-icon" th:src="${r.iconPath}"> <span
-						th:text="${r.name}"></span> <strong th:text="${r.maxScore}"></strong>
+
+				<div class="sub-ranking-head">
+					<div>順位</div>
+					<div></div>
+					<div>個人名</div>
+					<div>スコア</div>
+				</div>
+
+				<div th:each="r, stat : ${maxScoreRanking}" class="sub-ranking-row"
+					th:classappend="${stat.index == 0} ? ' is-top'">
+
+					<div class="sub-ranking-rank" th:text="${stat.index + 1}"></div>
+
+					<img class="sub-ranking-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
+
+					<div class="sub-ranking-name" th:text="${r.name}"></div>
+
+					<div class="sub-ranking-value" th:text="${r.maxScore}"></div>
 				</div>
 			</div>
 
+			<!-- 4着回避率 -->
 			<div class="sub-ranking-card">
 				<h2>4着回避率</h2>
-				<div th:each="r, stat : ${avoidLastRanking}" class="sub-row">
-					<span th:text="${stat.index + 1}"></span> <img class="mini-icon" th:src="${r.iconPath}"> <span
-						th:text="${r.name}"></span> <strong
-						th:text="${#numbers.formatDecimal(r.avoidLastRate, 1, 1)} + '%'"></strong>
+
+				<div class="sub-ranking-head">
+					<div>順位</div>
+					<div></div>
+					<div>個人名</div>
+					<div>回避率</div>
+				</div>
+
+				<div th:each="r, stat : ${avoidLastRanking}" class="sub-ranking-row"
+					th:classappend="${stat.index == 0} ? ' is-top'">
+
+					<div class="sub-ranking-rank" th:text="${stat.index + 1}"></div>
+
+					<img class="sub-ranking-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
+
+					<div class="sub-ranking-name" th:text="${r.name}"></div>
+
+					<div class="sub-ranking-value"
+						th:text="${#numbers.formatDecimal(r.avoidLastRate, 1, 1)} + '%'"></div>
 				</div>
 			</div>
 
+			<!-- トップ回数 -->
 			<div class="sub-ranking-card">
-				<h2>トップ回数</h2>
-				<div th:each="r, stat : ${topCountRanking}" class="sub-row">
-					<span th:text="${stat.index + 1}"></span> <img class="mini-icon" th:src="${r.iconPath}"> <span
-						th:text="${r.name}"></span> <strong th:text="${r.topCount}"></strong>
+				<h2>最多トップ</h2>
+
+				<div class="sub-ranking-head">
+					<div>順位</div>
+					<div></div>
+					<div>個人名</div>
+					<div>回数</div>
+				</div>
+
+				<div th:each="r, stat : ${topCountRanking}" class="sub-ranking-row"
+					th:classappend="${stat.index == 0} ? ' is-top'">
+
+					<div class="sub-ranking-rank" th:text="${stat.index + 1}"></div>
+
+					<img class="sub-ranking-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
+
+					<div class="sub-ranking-name" th:text="${r.name}"></div>
+
+					<div class="sub-ranking-value" th:text="${r.topCount}"></div>
 				</div>
 			</div>
+
 		</section>
 
 	</main>
+
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
 </body>
-<div th:replace="~{fragments/nav :: bottomNav}"></div>
 
 </html>

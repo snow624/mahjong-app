@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- reset css -->
+	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
+	<!-- css -->
+	<link rel="stylesheet" href="/css/style.css">
+	<!-- ファビコン -->
+	<link rel="icon" href="/img/favicon.ico" sizes="any" />
+	<!-- fontawesome -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+
+	<title>管理者ページ</title>
+</head>
+
+<body>
+	<main class="page-container">
+
+		<!-- 管理者ページタイトル -->
+		<div class="top-title">
+			<h1>ADMIN</h1>
+			<h3>管理者ページ</h3>
+		</div>
+
+		<!-- 管理者操作カード -->
+		<div class="form-card">
+
+			<!-- 現在の状態表示 -->
+			<p>登録プレイヤー数：<span th:text="${playerCount}"></span>人</p>
+			<p>現在の試合枠：<span th:text="${matchCount}"></span>試合</p>
+			<p>目標試合数：<span th:text="${requiredMatchCount}"></span>試合</p>
+			<p>1人あたり目安：<span th:text="${targetGamesPerPlayer}"></span>試合</p>
+
+			<!-- エラーメッセージ -->
+			<p th:if="${error}" class="error-message" th:text="${error}"></p>
+
+			<!-- 試合枠作成 -->
+			<form action="/matches/init" method="post">
+				<button class="primary-button" type="submit">
+					試合枠を自動作成
+				</button>
+			</form>
+
+			<!-- 対戦表作成 -->
+			<form action="/matches/generate" method="post">
+				<button class="primary-button" type="submit">
+					対戦表作成
+				</button>
+			</form>
+
+			<!-- 対戦表削除 -->
+			<form action="/matches/clear" method="post">
+				<button class="danger-button" type="submit" onclick="return confirm('対戦表と点数を削除します。よろしいですか？');">
+					対戦表削除
+				</button>
+			</form>
+
+			<!-- 試合枠も全部削除 -->
+			<form action="/matches/clear-all" method="post">
+				<button class="danger-button" type="submit" onclick="return confirm('試合枠も含めてすべて削除します。よろしいですか？');">
+					試合枠も全部削除
+				</button>
+			</form>
+		</div>
+
+		<!-- 試合一覧に戻る -->
+		<a href="/matches" class="primary-link-button">
+			試合一覧へ戻る
+		</a>
+
+	</main>
+
+	<!-- 下部ナビ -->
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
+</body>
+
+</html>

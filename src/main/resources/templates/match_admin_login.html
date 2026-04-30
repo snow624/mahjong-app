@@ -12,33 +12,43 @@
 	<!-- fontawesome -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 
-	<title>プレイヤー削除</title>
+	<title>管理者ログイン</title>
 </head>
 
 <body>
 	<main class="page-container">
-		<h1>プレイヤー削除</h1>
 
-		<section class="form-card">
-			<p>
-				<strong th:text="${player.name}"></strong>
-				を削除しますか？
-			</p>
+		<!-- 管理者ログイン画面 -->
+		<div class="top-title">
+			<h1>ADMIN</h1>
+			<h3>管理者ログイン</h3>
+		</div>
 
+		<div class="form-card">
+
+			<!-- エラーメッセージ -->
 			<p th:if="${error}" class="error-message" th:text="${error}"></p>
 
-			<form th:action="@{'/players/' + ${player.id} + '/delete'}" method="post">
+			<!-- 管理者ログインフォーム -->
+			<form action="/matches/admin/login" method="post">
 				<div class="form-group">
-					<label>削除パスワード</label>
-					<input type="password" name="password" placeholder="パスワードを入力">
+					<label>管理者パスワード</label>
+					<input type="password" name="password">
 				</div>
 
-				<button type="submit" class="danger-button">削除する</button>
+				<button class="primary-button" type="submit">
+					ログイン
+				</button>
 			</form>
-		</section>
+		</div>
+
+		<a href="/matches" class="primary-link-button">
+			試合一覧へ戻る
+		</a>
+
 	</main>
 
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
 </body>
-<div th:replace="~{fragments/nav :: bottomNav}"></div>
 
 </html>

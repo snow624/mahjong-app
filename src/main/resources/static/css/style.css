@@ -12,6 +12,7 @@
 
 	--color-main-green: #087233;
 	--color-main-red: #d40000;
+	--color-rank-gray: #777;
 
 	--color-nav-bg: #1c1c1c;
 
@@ -20,6 +21,13 @@
 	--color-bronze: #cd7f32;
 
 	--color-black: #000;
+	--color-dark-text: #111;
+	--color-muted-text: #555;
+	--color-light-gray: #eee;
+	--color-label-text: #aaa;
+	--color-input-border: #ddd;
+
+	--shadow-card: 0 4px 16px rgba(0, 0, 0, .08);
 }
 
 /* =========================
@@ -40,8 +48,6 @@ h1 {
 
 img {
 	border-radius: 50%;
-	width: 60px;
-	height: 60px;
 	object-fit: cover;
 }
 
@@ -101,7 +107,7 @@ tr:hover {
 	border-top: 1px solid var(--color-border);
 	display: flex;
 	justify-content: space-around;
-	padding: 8px 0;
+	padding: 5px 0;
 	z-index: 1000;
 }
 
@@ -110,6 +116,7 @@ tr:hover {
 	text-decoration: none;
 	font-size: 12px;
 	text-align: center;
+	padding: 15px 0;
 }
 
 .bottom-nav span {
@@ -121,34 +128,87 @@ tr:hover {
    4. ランキング画面
 ========================= */
 .main-ranking {
-	padding: 24px 16px 90px;
+	color: var(--color-card-light);
+	border-radius: 20px;
+	padding: 22px 14px 24px;
+	box-shadow: var(--shadow-card);
+}
+
+.main-ranking .top-title {
+	padding-bottom: 18px;
+}
+
+.main-ranking .top-title h1 {
+	font-size: 2.8rem;
+	margin-bottom: 8px;
+}
+
+.main-ranking .top-title h3 {
+	font-size: .95rem;
+	font-weight: 700;
+}
+
+.ranking-header {
+	display: grid;
+	grid-template-columns: 24px 28px minmax(72px, 1fr) 64px 56px 48px;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 10px;
+	padding: 0 2px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--color-label-text);
 }
 
 .ranking-row {
 	display: grid;
-	grid-template-columns: 44px 56px 1fr 80px 70px 60px;
+	grid-template-columns: 24px 28px minmax(72px, 1fr) 64px 56px 48px;
 	align-items: center;
-	gap: 12px;
-	margin-bottom: 18px;
-	font-weight: bold;
+	gap: 8px;
+	padding: 10px 2px;
+	font-weight: 700;
+}
+
+.ranking-row:last-child {
+	border-bottom: none;
 }
 
 .rank-badge {
 	background: var(--color-main-green);
 	color: var(--color-text);
-	border-radius: 8px;
-	text-align: center;
-	padding: 8px 0;
-	font-size: 24px;
-}
+	border-radius: 7px;
+	font-size: 12px;
+	font-weight: 900;
+	width: 24px;
+	height: 30px;
 
-.ranking-row:first-of-type .rank-badge {
-	background: var(--color-main-red);
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .player-icon {
-	width: 52px;
-	height: 52px;
+	width: 26px;
+	height: 26px;
+}
+
+.player-name {
+	min-width: 0;
+	font-size: 15px;
+	font-weight: 800;
+	line-height: 1.2;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.point,
+.diff,
+.games {
+	font-size: 13px;
+	font-weight: 800;
+	text-align: right;
+	white-space: nowrap;
 }
 
 /* =========================
@@ -157,103 +217,176 @@ tr:hover {
 .sub-ranking-grid {
 	display: grid;
 	grid-template-columns: 1fr;
-	gap: 24px;
-	padding: 24px 16px 100px;
+	gap: 20px;
+	padding: 20px 0 100px;
 }
 
 .sub-ranking-card {
 	background: var(--color-card-light);
-	color: var(--color-black);
-	border-radius: 16px;
-	padding: 16px;
+	color: var(--color-dark-text);
+	border-radius: 20px;
+	padding: 24px 14px;
+	box-shadow: var(--shadow-card);
 }
 
 .sub-ranking-card h2 {
 	text-align: center;
+	font-size: 22px;
+	font-weight: 900;
+	margin-bottom: 22px;
 }
 
-.sub-row {
+.sub-ranking-head {
 	display: grid;
-	grid-template-columns: 36px 42px 1fr 70px;
+	grid-template-columns: 44px 42px minmax(0, 1fr) 78px;
 	align-items: center;
-	gap: 10px;
-	padding: 10px 0;
-	font-weight: bold;
+	gap: 8px;
+	padding: 0 8px;
+	margin-bottom: 10px;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--color-label-text);
 }
 
-.sub-row:first-of-type {
+.sub-ranking-row {
+	display: grid;
+	grid-template-columns: 44px 42px minmax(0, 1fr) 78px;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 8px;
+	border-radius: 16px;
+	margin-bottom: 6px;
+}
+
+.sub-ranking-row.is-top {
 	background: var(--color-main-green);
 	color: var(--color-text);
-	border-radius: 10px;
-	padding: 10px;
 }
 
-.mini-icon {
-	width: 36px;
-	height: 36px;
+.sub-ranking-rank {
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	font-weight: 900;
+}
+
+.sub-ranking-row.is-top .sub-ranking-rank {
+	background: var(--color-card-light);
+	color: var(--color-main-green);
+	border-radius: 50%;
+}
+
+.sub-ranking-icon {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	object-fit: cover;
+	background: var(--color-light-gray);
+}
+
+.sub-ranking-name {
+	min-width: 0;
+	font-size: 16px;
+	font-weight: 800;
+	line-height: 1.2;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.sub-ranking-value {
+	font-size: 20px;
+	font-weight: 900;
+	text-align: right;
+	white-space: nowrap;
 }
 
 /* =========================
    6. 試合一覧
 ========================= */
 .match-card {
-	background: #fff;
-	color: #111;
-	border-radius: 18px;
-	padding: 18px;
-	margin-bottom: 24px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+	background: var(--color-card-light);
+	color: var(--color-dark-text);
+	border-radius: 16px;
+	padding: 14px;
+	margin-bottom: 16px;
+	box-shadow: var(--shadow-card);
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px 12px;
+}
+
+.match-link {
+	text-decoration: none;
+	color: inherit;
+}
+
+.match-card .match-link {
+	grid-column: 1 / -1;
 }
 
 .match-title {
-	background: #eee;
-	color: #555;
+	background: var(--color-light-gray);
+	color: var(--color-muted-text);
 	text-align: center;
 	border-radius: 8px;
-	padding: 10px;
-	font-size: 22px;
+	padding: 8px;
+	font-size: 18px;
 	font-weight: 700;
-	margin-bottom: 20px;
+	margin-bottom: 12px;
 }
 
 .match-player-row {
 	display: grid;
-	grid-template-columns: 44px 72px 1fr;
+	grid-template-columns: 32px 42px 1fr;
 	align-items: center;
-	gap: 14px;
-	margin-bottom: 18px;
+	gap: 8px;
+	margin-bottom: 0;
+}
+
+.match-card>.match-player-row {
+	margin-bottom: 10px;
+}
+
+.match-card>.match-player-row:nth-of-type(2n + 1) {
+	margin-bottom: 0;
 }
 
 .match-player-rank {
-	background: #087233;
-	color: #fff;
+	background: var(--color-main-green);
+	color: var(--color-text);
 	border-radius: 8px;
 	text-align: center;
-	font-size: 24px;
+	font-size: 18px;
 	font-weight: 700;
-	padding: 8px 0;
+	padding: 6px 0;
 }
 
 .match-player-rank.rank-1 {
-	background: #d40000;
+	background: var(--color-main-red);
 }
 
 .match-player-icon {
-	width: 72px;
-	height: 72px;
+	width: 42px;
+	height: 42px;
 	border-radius: 50%;
 	object-fit: cover;
-	background: #eee;
+	background: var(--color-light-gray);
 }
 
 .match-player-name {
-	font-size: 22px;
+	font-size: 15px;
 	font-weight: 700;
+	line-height: 1.2;
 }
 
 .match-player-point {
-	font-size: 18px;
-	margin-top: 4px;
+	font-size: 13px;
+	margin-top: 2px;
+	color: var(--color-muted-text);
 }
 
 /* =========================
@@ -263,11 +396,16 @@ tr:hover {
 	display: flex;
 	align-items: center;
 	gap: 16px;
-	background: #fff;
-	color: #111;
 	border-radius: 16px;
 	padding: 14px 16px;
 	margin-bottom: 14px;
+}
+
+.player-card,
+.form-card {
+	background: var(--color-card-light);
+	color: var(--color-dark-text);
+	box-shadow: var(--shadow-card);
 }
 
 .player-card img {
@@ -294,11 +432,8 @@ tr:hover {
    8. プレイヤー編集
 ========================= */
 .form-card {
-	background: #fff;
-	color: #111;
 	border-radius: 18px;
 	padding: 24px 18px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
 }
 
 .edit-icon-preview {
@@ -339,10 +474,14 @@ tr:hover {
 	border: none;
 	border-radius: 999px;
 	padding: 14px;
-	background: #087233;
-	color: #fff;
 	font-size: 16px;
 	font-weight: 700;
+}
+
+.primary-button,
+.primary-link-button {
+	background: var(--color-main-green);
+	color: var(--color-text);
 }
 
 /* =========================
@@ -355,8 +494,6 @@ tr:hover {
 	margin: 0 0 18px;
 	padding: 14px;
 	border-radius: 999px;
-	background: #087233;
-	color: #fff;
 	text-align: center;
 	text-decoration: none;
 	font-weight: 700;
@@ -366,9 +503,18 @@ tr:hover {
    10. プレイヤー削除
 ========================= */
 .player-card-delete {
-	color: #d40000;
 	font-weight: 700;
 	text-decoration: none;
+}
+
+.player-card-delete,
+.error-message {
+	color: var(--color-main-red);
+}
+
+.danger-button {
+	background: var(--color-main-red);
+	color: var(--color-text);
 }
 
 .danger-button {
@@ -376,14 +522,11 @@ tr:hover {
 	border: none;
 	border-radius: 999px;
 	padding: 14px;
-	background: #d40000;
-	color: #fff;
 	font-size: 16px;
 	font-weight: 700;
 }
 
 .error-message {
-	color: #d40000;
 	font-weight: 700;
 }
 
@@ -392,49 +535,173 @@ tr:hover {
 }
 
 /* =========================
-   スマホ対応
+   11. 点数入力画面
 ========================= */
-@media screen and (max-width: 600px) {
-	table {
-		width: 100%;
-		font-size: 12px;
-	}
+.match-detail-title-card {
+	color: var(--color-card-light);
+	border-radius: 18px;
+	padding: 18px 16px;
+	margin-bottom: 18px;
+	text-align: center;
+	box-shadow: var(--shadow-card);
+}
 
-	th,
-	td {
-		padding: 6px;
-	}
+.match-detail-title-card h1 {
+	margin: 0;
+	font-size: 34px;
+	font-weight: 900;
+}
 
-	img {
-		width: 32px;
-		height: 32px;
-	}
+.match-detail-label {
+	color: var(--color-main-green);
+	font-size: 15px;
+	font-weight: 900;
+	margin-bottom: 6px;
+}
 
-	.ranking-row {
-		grid-template-columns: 36px 44px 1fr;
-		grid-template-areas:
-			"rank icon name"
-			"rank icon point";
-	}
+.score-summary-card {
+	background: var(--color-card-light);
+	color: var(--color-dark-text);
+	border-radius: 18px;
+	padding: 20px 16px;
+	margin-bottom: 18px;
+	text-align: center;
+	box-shadow: var(--shadow-card);
+}
 
-	.rank-badge {
-		grid-area: rank;
-	}
+.score-summary-label {
+	font-size: 15px;
+	color: var(--color-muted-text);
+	font-weight: 800;
+	margin-bottom: 4px;
+}
 
-	.player-icon {
-		grid-area: icon;
-	}
+.remaining-score {
+	font-size: 44px;
+	font-weight: 900;
+	color: var(--color-main-red);
+	line-height: 1.2;
+}
 
-	.player-name {
-		grid-area: name;
-	}
+.remaining-score.score-ok {
+	color: var(--color-main-green);
+}
 
-	.point {
-		grid-area: point;
-	}
+.remaining-score.score-minus {
+	color: var(--color-main-red);
+}
 
-	.diff,
-	.games {
-		font-size: 12px;
-	}
+.score-summary-note {
+	font-size: 14px;
+	color: var(--color-muted-text);
+	margin-top: 8px;
+	line-height: 1.5;
+}
+
+.score-form {
+	display: grid;
+	gap: 16px;
+}
+
+.score-player-card {
+	background: var(--color-card-light);
+	color: var(--color-dark-text);
+	border-radius: 18px;
+	padding: 16px;
+	box-shadow: var(--shadow-card);
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 14px;
+}
+
+.score-player-info {
+	display: grid;
+	grid-template-columns: 42px 58px 1fr;
+	align-items: center;
+	gap: 10px;
+}
+
+.score-seat {
+	background: var(--color-main-green);
+	color: var(--color-text);
+	border-radius: 10px;
+	text-align: center;
+	font-size: 22px;
+	font-weight: 900;
+	padding: 8px 0;
+}
+
+.score-player-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	object-fit: cover;
+	background: var(--color-light-gray);
+}
+
+.score-player-name {
+	font-size: 16px;
+	font-weight: 900;
+	line-height: 1.2;
+}
+
+.score-input-wrap {
+	display: grid;
+	grid-template-columns: 38px 1fr;
+	gap: 8px;
+	align-items: center;
+	width: 100%;
+}
+
+.score-minus-button {
+	width: 38px;
+	height: 44px;
+	border-radius: 12px;
+	background: var(--color-light-gray);
+	color: var(--color-muted-text);
+	font-size: 22px;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid var(--color-input-border);
+}
+
+.score-minus-button.is-active {
+	background: var(--color-main-red);
+	color: var(--color-text);
+	border-color: var(--color-main-red);
+}
+
+.score-input {
+	width: 100%;
+	min-width: 0;
+	height: 48px;
+	box-sizing: border-box;
+	border: 1px solid var(--color-input-border);
+	border-radius: 12px;
+	padding: 8px 12px;
+	font-size: 24px;
+	font-weight: 900;
+	text-align: right;
+}
+
+.score-input:focus {
+	outline: 2px solid var(--color-main-green);
+	border-color: var(--color-main-green);
+}
+
+.score-form .primary-button {
+	min-height: 56px;
+	font-size: 20px;
+	border-radius: 18px;
+	margin-top: 8px;
+	margin-bottom: 14px;
+}
+
+.score-back-button {
+	background: var(--color-card);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+	margin-top: 0;
 }

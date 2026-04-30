@@ -6,9 +6,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,10 +27,14 @@ import com.snow.mahjong.repository.MatchRepository;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
 
-//試合一覧
-
 @Controller
 public class MatchController {
+
+	// 1人あたり何試合くらい出場させたいか
+	private static final int TARGET_GAMES_PER_PLAYER = 15;
+
+	// 1試合あたりの人数
+	private static final int PLAYERS_PER_MATCH = 4;
 
 	@Autowired
 	private MatchRepository matchRepository;
@@ -42,22 +48,34 @@ public class MatchController {
 	@Autowired
 	private MatchResultRepository matchResultRepository;
 
+	// application.properties の app.admin.password を読み込む
+	@Value("${app.admin.password}")
+	private String adminPassword;
+
+	/*
+	 * 試合一覧画面
+	 * URL: /matches
+	 *
+	 * 役割:
+	 * - 試合一覧を表示する
+	 * - 各試合に参加するプレイヤーを表示する
+	 * - 入力済みの順位・ポイントも表示する
+	 */
 	@GetMapping("/matches")
 	public String list(Model model) {
-
 		List<Match> matches = matchRepository.findAll();
 
 		Map<Long, List<MatchPlayer>> playerMap = new HashMap<>();
 		Map<Long, List<MatchResult>> resultMap = new HashMap<>();
 
-		for (Match m : matches) {
+		for (Match match : matches) {
 			playerMap.put(
-					m.getId(),
-					matchPlayerRepository.findByMatchIdOrderBySeatOrder(m.getId()));
+					match.getId(),
+					matchPlayerRepository.findByMatchIdOrderBySeatOrder(match.getId()));
 
 			resultMap.put(
-					m.getId(),
-					matchResultRepository.findByMatchId(m.getId()));
+					match.getId(),
+					matchResultRepository.findByMatchId(match.getId()));
 		}
 
 		model.addAttribute("matches", matches);
@@ -67,29 +85,19 @@ public class MatchController {
 		return "matches";
 	}
 
-	//    試合数
-	@GetMapping("/matches/init")
-	public String init() {
-
-		for (int i = 1; i <= 30; i++) {
-			Match match = new Match();
-			match.setMatchNumber(i);
-			matchRepository.save(match);
-		}
-
-		return "redirect:/matches";
-	}
-
-	//    試合詳細画面
+	/*
+	 * 試合詳細・点数入力画面
+	 * URL: /matches/{id}
+	 *
+	 * 役割:
+	 * - 1試合分の詳細を表示する
+	 * - その試合の4人を表示する
+	 * - 点数入力フォームを表示する
+	 */
 	@GetMapping("/matches/{id}")
 	public String detail(@PathVariable Long id, Model model) {
-
 		Match match = matchRepository.findById(id).orElse(null);
-
-		List<MatchPlayer> players = matchPlayerRepository.findAll()
-				.stream()
-				.filter(mp -> mp.getMatch().getId().equals(id))
-				.toList();
+		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdOrderBySeatOrder(id);
 
 		model.addAttribute("match", match);
 		model.addAttribute("players", players);
@@ -97,115 +105,298 @@ public class MatchController {
 		return "match_detail";
 	}
 
-	//    対戦表
-	@GetMapping("/matches/generate")
-	public String generate() {
+	/*
+	 * 管理者ページ
+	 * URL: /matches/admin
+	 *
+	 * 役割:
+	 * - 試合枠作成
+	 * - 対戦表作成
+	 * - 対戦表削除
+	 * - 試合枠削除
+	 * の管理操作をまとめて表示する
+	 */
+	@GetMapping("/matches/admin")
+	public String adminPage(HttpSession session, Model model) {
+
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
+		setAdminPageInfo(model);
+		return "match_admin";
+	}
+
+	/*
+	 * 管理者ログイン画面表示
+	 * URL: /matches/admin/login
+	 *
+	 * 役割:
+	 * - 管理者ページに入る前のパスワード入力画面を表示する
+	 */
+	@GetMapping("/matches/admin/login")
+	public String adminLoginForm() {
+		return "match_admin_login";
+	}
+
+	/*
+	 * 管理者ログイン処理
+	 * URL: /matches/admin/login
+	 *
+	 * 役割:
+	 * - 入力されたパスワードを確認する
+	 * - 正しければセッションにログイン済み情報を保存する
+	 */
+	@PostMapping("/matches/admin/login")
+	public String adminLogin(
+			@RequestParam String password,
+			HttpSession session,
+			Model model) {
+
+		if (!isAdmin(password)) {
+			model.addAttribute("error", "パスワードが違います");
+			return "match_admin_login";
+		}
+
+		session.setAttribute("adminLogin", true);
+		return "redirect:/matches/admin";
+	}
+
+	/*
+	 * 試合枠の自動作成
+	 * URL: /matches/init
+	 *
+	 * 役割:
+	 * - 登録プレイヤー数から必要な試合数を自動計算する
+	 * - 1人15試合くらいになるように試合枠を作る
+	 * - 既に試合枠がある場合は、足りない分だけ追加する
+	 */
+	@PostMapping("/matches/init")
+	public String init(HttpSession session, Model model) {
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
 
 		List<Player> players = playerRepository.findAll();
 
-		// 出場回数管理
+		if (players.size() < PLAYERS_PER_MATCH) {
+			model.addAttribute("error", "プレイヤーが4人未満のため、試合枠を作成できません");
+			setAdminPageInfo(model);
+			return "match_admin";
+		}
+
+		int requiredMatchCount = (int) Math.ceil(
+				players.size() * TARGET_GAMES_PER_PLAYER / (double) PLAYERS_PER_MATCH);
+
+		long currentMatchCount = matchRepository.count();
+
+		for (long i = currentMatchCount + 1; i <= requiredMatchCount; i++) {
+			Match match = new Match();
+			match.setMatchNumber((int) i);
+			matchRepository.save(match);
+		}
+
+		return "redirect:/matches/admin";
+	}
+
+	/*
+	 * 対戦表作成
+	 * URL: /matches/generate
+	 *
+	 * 役割:
+	 * - 試合枠に対してプレイヤー4人を割り当てる
+	 * - 出場回数が少ない人から優先して選ぶ
+	 * - 同じ出場回数の人はランダムにする
+	 * - 既にメンバーが入っている試合はスキップする
+	 */
+	@PostMapping("/matches/generate")
+	public String generate(HttpSession session, Model model) {
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
+		List<Player> players = playerRepository.findAll();
+
+		if (players.size() < PLAYERS_PER_MATCH) {
+			model.addAttribute("error", "プレイヤーが4人未満のため、対戦表を作成できません");
+			setAdminPageInfo(model);
+			return "match_admin";
+		}
+
 		Map<Long, Integer> playCount = new HashMap<>();
-		for (Player p : players) {
-			playCount.put(p.getId(), 0);
+		for (Player player : players) {
+			playCount.put(player.getId(), 0);
 		}
 
 		List<Match> matches = matchRepository.findAll();
 
-		Random rand = new Random();
-
 		for (Match match : matches) {
+			List<MatchPlayer> existingPlayers = matchPlayerRepository.findByMatchIdOrderBySeatOrder(match.getId());
 
-			// 出場回数少ない順で並び替え
-			players.sort(Comparator.comparing(p -> playCount.get(p.getId())));
-
-			List<Player> candidates = new ArrayList<>(players);
-
-			// ランダムで4人選ぶ
-			Collections.shuffle(candidates);
-
-			// 4人未満ならスキップ（安全対策）
-			if (candidates.size() < 4) {
+			if (!existingPlayers.isEmpty()) {
 				continue;
 			}
 
-			// 4人選ぶ
-			List<Player> selected = candidates.subList(0, 4);
+			Collections.shuffle(players);
+			players.sort(Comparator.comparing(player -> playCount.get(player.getId())));
 
-			int seat = 1;
+			List<Player> selectedPlayers = players.subList(0, PLAYERS_PER_MATCH);
 
-			for (Player p : selected) {
-				MatchPlayer mp = new MatchPlayer();
-				mp.setMatch(match);
-				mp.setPlayer(p);
-				mp.setSeatOrder(seat++);
-				matchPlayerRepository.save(mp);
+			int seatOrder = 1;
 
-				// 出場回数カウントアップ
-				playCount.put(p.getId(), playCount.get(p.getId()) + 1);
+			for (Player player : selectedPlayers) {
+				MatchPlayer matchPlayer = new MatchPlayer();
+				matchPlayer.setMatch(match);
+				matchPlayer.setPlayer(player);
+				matchPlayer.setSeatOrder(seatOrder++);
+				matchPlayerRepository.save(matchPlayer);
+
+				playCount.put(player.getId(), playCount.get(player.getId()) + 1);
 			}
 		}
 
 		return "redirect:/matches";
 	}
 
+	/*
+	 * 対戦表削除
+	 * URL: /matches/clear
+	 *
+	 * 役割:
+	 * - 対戦表と点数結果を削除する
+	 * - 試合枠そのものは残す
+	 */
+	@PostMapping("/matches/clear")
+	public String clearMatches(HttpSession session, Model model) {
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
+		matchResultRepository.deleteAll();
+		matchPlayerRepository.deleteAll();
+
+		return "redirect:/matches/admin";
+	}
+
+	/*
+	 * 試合枠も全部削除
+	 * URL: /matches/clear-all
+	 *
+	 * 役割:
+	 * - 点数結果を削除する
+	 * - 対戦表を削除する
+	 * - 試合枠も削除する
+	 */
+	@PostMapping("/matches/clear-all")
+	public String clearAll(HttpSession session, Model model) {
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
+		matchResultRepository.deleteAll();
+		matchPlayerRepository.deleteAll();
+		matchRepository.deleteAll();
+
+		return "redirect:/matches/admin";
+	}
+
+	/*
+	 * 点数登録処理
+	 * URL: /matches/result
+	 *
+	 * 役割:
+	 * - 各プレイヤーの素点を保存する
+	 * - 合計が100000点かチェックする
+	 * - 順位を計算する
+	 * - ウマ込みのポイントを計算する
+	 */
 	@PostMapping("/matches/result")
 	public String saveResult(
-	        @RequestParam Long matchId,
-	        @RequestParam List<Long> playerIds,
-	        @RequestParam List<Integer> scores,
-	        Model model
-	) {
+			@RequestParam Long matchId,
+			@RequestParam List<Long> playerIds,
+			@RequestParam List<Integer> scores,
+			Model model) {
 
 		int total = scores.stream().mapToInt(Integer::intValue).sum();
 
-	    if (total != 100000) {
-	        model.addAttribute("error", "合計が100000点になっていません");
+		if (total != 100000) {
+			model.addAttribute("error", "合計が100000点になっていません");
+			setMatchDetailInfo(matchId, model);
+			return "match_detail";
+		}
 
-	        Match match = matchRepository.findById(matchId).orElse(null);
-	        List<MatchPlayer> players = matchPlayerRepository.findByMatchIdOrderBySeatOrder(matchId);
+		Match match = matchRepository.findById(matchId).orElse(null);
 
-	        model.addAttribute("match", match);
-	        model.addAttribute("players", players);
+		// 既存結果削除（再入力対応）
+		matchResultRepository.deleteAll(
+				matchResultRepository.findByMatchId(matchId));
 
-	        return "match_detail";
-	    }
-	    
-	    Match match = matchRepository.findById(matchId).orElse(null);
+		// 順位計算用
+		List<Integer> sortedScores = new ArrayList<>(scores);
+		sortedScores.sort(Collections.reverseOrder());
 
-	    // 既存結果削除（再入力対応）
-	    matchResultRepository.deleteAll(
-	        matchResultRepository.findByMatchId(matchId)
-	    );
+		for (int i = 0; i < playerIds.size(); i++) {
+			int score = scores.get(i);
+			int rank = sortedScores.indexOf(score) + 1;
 
-	    // 順位計算用
-	    List<Integer> sorted = new ArrayList<>(scores);
-	    sorted.sort(Collections.reverseOrder());
+			double uma = switch (rank) {
+			case 1 -> 10;
+			case 2 -> 5;
+			case 3 -> -5;
+			case 4 -> -10;
+			default -> 0;
+			};
 
-	    for (int i = 0; i < playerIds.size(); i++) {
+			double point = (score - 30000) / 1000.0 + uma;
 
-	        int score = scores.get(i);
-	        int rank = sorted.indexOf(score) + 1;
+			MatchResult matchResult = new MatchResult();
+			matchResult.setMatch(match);
+			matchResult.setPlayer(playerRepository.findById(playerIds.get(i)).orElse(null));
+			matchResult.setScore(score);
+			matchResult.setRankOrder(rank);
+			matchResult.setPoint(point);
 
-	        double uma = switch (rank) {
-	            case 1 -> 10;
-	            case 2 -> 5;
-	            case 3 -> -5;
-	            case 4 -> -10;
-	            default -> 0;
-	        };
+			matchResultRepository.save(matchResult);
+		}
 
-	        double point = (score - 30000) / 1000.0 + uma;
+		return "redirect:/matches";
+	}
 
-	        MatchResult mr = new MatchResult();
-	        mr.setMatch(match);
-	        mr.setPlayer(playerRepository.findById(playerIds.get(i)).orElse(null));
-	        mr.setScore(score);
-	        mr.setRankOrder(rank);
-	        mr.setPoint(point);
+	/*
+	 * 管理者パスワード確認
+	 */
+	private boolean isAdmin(String password) {
+		return adminPassword.equals(password);
+	}
 
-	        matchResultRepository.save(mr);
-	    }
+	/*
+	 * 管理者ページに表示する情報をセットする
+	 */
+	private void setAdminPageInfo(Model model) {
+		long playerCount = playerRepository.count();
+		long matchCount = matchRepository.count();
 
-	    return "redirect:/matches";
+		int requiredMatchCount = 0;
+
+		if (playerCount >= PLAYERS_PER_MATCH) {
+			requiredMatchCount = (int) Math.ceil(
+					playerCount * TARGET_GAMES_PER_PLAYER / (double) PLAYERS_PER_MATCH);
+		}
+
+		model.addAttribute("playerCount", playerCount);
+		model.addAttribute("matchCount", matchCount);
+		model.addAttribute("requiredMatchCount", requiredMatchCount);
+		model.addAttribute("targetGamesPerPlayer", TARGET_GAMES_PER_PLAYER);
+	}
+
+	/*
+	 * 試合詳細画面に戻る時に必要な情報をセットする
+	 */
+	private void setMatchDetailInfo(Long matchId, Model model) {
+		Match match = matchRepository.findById(matchId).orElse(null);
+		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdOrderBySeatOrder(matchId);
+
+		model.addAttribute("match", match);
+		model.addAttribute("players", players);
 	}
 }

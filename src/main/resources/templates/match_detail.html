@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<!-- reset css -->
 	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
 	<!-- css -->
@@ -12,32 +13,135 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 
 	<title>試合詳細</title>
-
 </head>
 
 <body>
 	<main class="page-container">
 
-		<h1 th:text="'第' + ${match.matchNumber} + '試合'"></h1>
+		<!-- 試合詳細タイトル -->
+		<div class="match-detail-title-card">
+			<div class="match-detail-label">点数入力</div>
+			<h1 th:text="'第' + ${match.matchNumber} + '試合'"></h1>
+		</div>
 
-		<!-- 合計100000点でなければエラー表示 -->
-		<p th:if="${error}" style="color:red;" th:text="${error}"></p>
+		<!-- エラーメッセージ -->
+		<p th:if="${error}" class="error-message" th:text="${error}"></p>
 
-		<form action="/matches/result" method="post">
+		<!-- 残り点数表示 -->
+		<div class="score-summary-card">
+			<div class="score-summary-label">残り点数</div>
+			<div id="remainingScore" class="remaining-score">100000</div>
+			<div class="score-summary-note">4人の合計が100000点になるように入力してください</div>
+		</div>
+
+		<form action="/matches/result" method="post" class="score-form">
 
 			<input type="hidden" name="matchId" th:value="${match.id}">
 
-			<div th:each="mp : ${players}">
-				<span th:text="${mp.player.name}"></span>
-				<input type="number" name="scores" placeholder="点数入力">
-				<input type="hidden" name="playerIds" th:value="${mp.player.id}">
+			<!-- プレイヤーごとの点数入力 -->
+			<div th:each="mp, stat : ${players}" class="score-player-card">
+
+				<div class="score-player-info">
+					<div class="score-seat" th:text="${stat.index + 1}"></div>
+
+					<img class="score-player-icon"
+						th:src="${mp.player.iconPath != null ? mp.player.iconPath : '/images/default.png'}">
+
+					<div class="score-player-name" th:text="${mp.player.name}"></div>
+				</div>
+
+				<div class="score-input-wrap">
+					<button type="button" class="score-minus-button">−</button>
+
+					<input type="text" name="scores" class="score-input" placeholder="25000" inputmode="numeric"
+						pattern="-?[0-9]*">
+
+					<input type="hidden" name="playerIds" th:value="${mp.player.id}">
+				</div>
+
 			</div>
 
-			<button type="submit">保存</button>
+			<button type="submit" class="primary-button">
+				保存
+			</button>
 		</form>
 
+		<a href="/matches" class="primary-link-button">
+			試合一覧へ戻る
+		</a>
+
 	</main>
+
+	<div th:replace="~{fragments/nav :: bottomNav}"></div>
+
+	<script>
+		const scoreInputs = document.querySelectorAll(".score-input");
+		const minusButtons = document.querySelectorAll(".score-minus-button");
+		const remainingScore = document.getElementById("remainingScore");
+		const totalScore = 100000;
+
+		function updateRemainingScore() {
+			let inputTotal = 0;
+
+			scoreInputs.forEach(input => {
+				inputTotal += Number(input.value || 0);
+			});
+
+			const remaining = totalScore - inputTotal;
+			remainingScore.textContent = remaining.toLocaleString();
+
+			if (remaining === 0) {
+				remainingScore.classList.remove("score-minus");
+				remainingScore.classList.add("score-ok");
+			} else if (remaining < 0) {
+				remainingScore.classList.remove("score-ok");
+				remainingScore.classList.add("score-minus");
+			} else {
+				remainingScore.classList.remove("score-ok");
+				remainingScore.classList.remove("score-minus");
+			}
+		}
+
+		function syncMinusButton(input, button) {
+			if (input.value.startsWith("-")) {
+				button.classList.add("is-active");
+			} else {
+				button.classList.remove("is-active");
+			}
+		}
+
+		minusButtons.forEach((button, index) => {
+			const input = scoreInputs[index];
+
+			button.addEventListener("click", () => {
+				if (input.value.startsWith("-")) {
+					input.value = input.value.substring(1);
+				} else if (input.value) {
+					input.value = "-" + input.value;
+				} else {
+					input.value = "-";
+				}
+
+				syncMinusButton(input, button);
+				updateRemainingScore();
+			});
+
+			input.addEventListener("input", () => {
+				// 数字とマイナス以外を消す
+				input.value = input.value.replace(/[^0-9-]/g, "");
+
+				// マイナスは先頭1個だけにする
+				if (input.value.includes("-")) {
+					input.value = "-" + input.value.replace(/-/g, "");
+				}
+
+				syncMinusButton(input, button);
+				updateRemainingScore();
+			});
+		});
+
+		updateRemainingScore();
+	</script>
 </body>
-<div th:replace="~{fragments/nav :: bottomNav}"></div>
 
 </html>
