@@ -12,6 +12,7 @@
 
 	--color-main-green: #087233;
 	--color-main-red: #d40000;
+	--color-main-yellow: #f2c94c;
 	--color-rank-gray: #777;
 
 	--color-nav-bg: #1c1c1c;
@@ -383,10 +384,21 @@ tr:hover {
 	line-height: 1.2;
 }
 
+.match-player-result {
+	margin-top: 2px;
+}
+
+.match-player-score {
+	font-size: 12px;
+	color: var(--color-muted-text);
+	font-weight: 700;
+}
+
 .match-player-point {
 	font-size: 13px;
 	margin-top: 2px;
 	color: var(--color-muted-text);
+	font-weight: 700;
 }
 
 /* =========================
@@ -426,6 +438,12 @@ tr:hover {
 	font-weight: 700;
 	text-decoration: none;
 }
+
+.match-title.is-completed {
+	background: var(--color-main-yellow);
+	color: var(--color-dark-text);
+}
+
 
 
 /* =========================

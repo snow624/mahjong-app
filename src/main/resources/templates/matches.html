@@ -27,7 +27,9 @@
 
 		<section th:each="m : ${matches}" class="match-card">
 			<a th:href="@{'/matches/' + ${m.id}}" class="match-link">
-				<div class="match-title" th:text="'第' + ${m.matchNumber} + '回戦'"></div>
+				<div class="match-title" th:classappend="${#lists.size(resultMap[m.id]) > 0} ? ' is-completed'"
+					th:text="'第' + ${m.matchNumber} + '回戦'">
+				</div>
 			</a>
 
 			<div th:each="mp : ${playerMap[m.id]}" class="match-player-row">
@@ -43,9 +45,14 @@
 				<div>
 					<div class="match-player-name" th:text="${mp.player.name}"></div>
 
-					<div class="match-player-point" th:each="r : ${resultMap[m.id]}"
-						th:if="${r.player.id == mp.player.id}"
-						th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'">
+					<div th:each="r : ${resultMap[m.id]}" th:if="${r.player.id == mp.player.id}"
+						class="match-player-result">
+
+						<div class="match-player-score" th:text="${r.score} + '点'">
+						</div>
+
+						<div class="match-player-point" th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'">
+						</div>
 					</div>
 				</div>
 			</div>
