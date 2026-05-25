@@ -723,3 +723,252 @@ tr:hover {
 	border: 1px solid var(--color-border);
 	margin-top: 0;
 }
+
+/* =========================
+   管理者ページ
+========================= */
+
+.page-container {
+    min-height: 100vh;
+    padding: 24px 16px 100px;
+    background: #f6f7fb;
+}
+
+/* タイトル */
+.top-title {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.top-title h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: #2f3640;
+}
+
+.top-title h3 {
+    margin-top: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #718093;
+}
+
+/* エラーメッセージ */
+.admin-error {
+    max-width: 680px;
+    margin: 0 auto 18px;
+    padding: 12px 14px;
+    color: #c0392b;
+    background: #fff0f0;
+    border: 1px solid #f5b7b1;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* カード共通 */
+.admin-status-card,
+.admin-action-card {
+    max-width: 680px;
+    margin: 0 auto 22px;
+    padding: 22px 18px;
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.admin-status-card h2,
+.admin-action-card h2 {
+    margin-bottom: 18px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #2f3640;
+}
+
+/* 現在の状態 */
+.admin-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.admin-status-item {
+    padding: 16px 12px;
+    background: #f8f9fc;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid #edf0f5;
+}
+
+.admin-status-label {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #7f8fa6;
+}
+
+.admin-status-value {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 3px;
+    color: #273c75;
+}
+
+.admin-status-value span {
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.admin-status-value small {
+    font-size: 12px;
+    font-weight: 700;
+    color: #718093;
+}
+
+/* 試合管理ボタン */
+.admin-action-card form {
+    margin-bottom: 12px;
+}
+
+.admin-action-card form:last-child {
+    margin-bottom: 0;
+}
+
+.admin-action-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 16px;
+    border: none;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.admin-action-button i {
+    font-size: 15px;
+}
+
+.admin-action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+    opacity: 0.95;
+}
+
+.admin-action-button.primary {
+    background: linear-gradient(135deg, #40739e, #273c75);
+}
+
+.admin-action-button.danger {
+    background: linear-gradient(135deg, #e84118, #c23616);
+}
+
+/* 戻るボタン */
+.admin-back-button {
+    max-width: 680px;
+    margin: 8px auto 0;
+}
+
+/* 既存の primary-link-button が弱い場合用 */
+.primary-link-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 16px;
+    color: #40739e;
+    background: #eef4fa;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: 0.15s ease;
+}
+
+.primary-link-button:hover {
+    background: #dcebf6;
+    transform: translateY(-2px);
+}
+
+/* =========================
+   13. 管理者ログイン画面
+========================= */
+.admin-login-card {
+	background: var(--color-card-light);
+	color: var(--color-dark-text);
+	border-radius: 20px;
+	padding: 24px 18px;
+	margin-bottom: 18px;
+	box-shadow: var(--shadow-card);
+	text-align: center;
+}
+
+.admin-login-icon {
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: var(--color-main-green);
+	color: var(--color-text);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 16px;
+	font-size: 26px;
+}
+
+.admin-login-card h2 {
+	font-size: 24px;
+	font-weight: 900;
+	margin-bottom: 10px;
+}
+
+.admin-login-note {
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--color-muted-text);
+	margin-bottom: 20px;
+	text-align: left;
+}
+
+.admin-login-error {
+	background: rgba(212, 0, 0, .08);
+	border-radius: 12px;
+	padding: 12px;
+	margin-bottom: 16px;
+	text-align: center;
+}
+
+.admin-login-card .form-group {
+	text-align: left;
+}
+
+.admin-login-card input[type="password"] {
+	width: 100%;
+	box-sizing: border-box;
+	border: 1px solid var(--color-input-border);
+	border-radius: 14px;
+	padding: 14px;
+	font-size: 18px;
+}
+
+.admin-login-card input[type="password"]:focus {
+	outline: 2px solid var(--color-main-green);
+	border-color: var(--color-main-green);
+}
+
+.admin-login-button {
+	min-height: 56px;
+	border-radius: 18px;
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}

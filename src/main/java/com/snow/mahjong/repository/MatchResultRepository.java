@@ -11,4 +11,6 @@ import com.snow.mahjong.entity.MatchResult;
 
 public interface MatchResultRepository extends JpaRepository<MatchResult, Long> {
 	List<MatchResult> findByMatchId(Long matchId);
+	
+	List<MatchResult> findAllByOrderByMatchIdAsc();
 }

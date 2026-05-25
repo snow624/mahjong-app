@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,19 @@ import com.snow.mahjong.entity.Player;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
 
+/*
+ * ランキング画面Controller
+ *
+ * 役割:
+ * - ランキング画面を表示する
+ * - 各プレイヤーの合計ポイントを集計する
+ * - 試合数を集計する
+ * - 最高スコアを集計する
+ * - トップ回数を集計する
+ * - 4着回避率を計算する
+ * - 1位との差を計算する
+ * - メインランキング、最高スコアランキング、4着回避率ランキング、最多トップランキングを作る
+ */
 @Controller
 public class RankingController {
 
@@ -24,130 +38,225 @@ public class RankingController {
 	@Autowired
 	private MatchResultRepository matchResultRepository;
 
+	/*
+	 * 1人あたりの目標試合数
+	 *
+	 * application.properties の
+	 * app.target-games-per-player
+	 * を読み込む
+	 *
+	 * 例:
+	 * app.target-games-per-player=10
+	 */
+	@Value("${app.target-games-per-player}")
+	private int targetGamesPerPlayer;
+
+	/*
+	 * ランキング画面
+	 * URL: /ranking
+	 *
+	 * 役割:
+	 * - DBからプレイヤーと試合結果を取得する
+	 * - 各種ランキング用のデータを集計する
+	 * - ranking.html にデータを渡す
+	 */
 	@GetMapping("/ranking")
 	public String ranking(Model model) {
 
+		// 登録済みプレイヤーを全件取得
 		List<Player> players = playerRepository.findAll();
+
+		// 入力済みの試合結果を全件取得
 		List<MatchResult> results = matchResultRepository.findAll();
 
-		//        ポイント
+		/*
+		 * プレイヤーごとの集計用Map
+		 *
+		 * key:
+		 * - playerId
+		 *
+		 * value:
+		 * - 各プレイヤーの集計値
+		 */
 		Map<Long, Double> pointMap = new HashMap<>();
-		//        試合数
 		Map<Long, Integer> gameCountMap = new HashMap<>();
-		//        最高スコア
 		Map<Long, Integer> maxScoreMap = new HashMap<>();
-		//        １位回数
 		Map<Long, Integer> topCountMap = new HashMap<>();
-		//        ４着回避率
 		Map<Long, Integer> avoidLastCountMap = new HashMap<>();
 
-		// 初期化
-		for (Player p : players) {
-			pointMap.put(p.getId(), 0.0);
-			gameCountMap.put(p.getId(), 0);
-			maxScoreMap.put(p.getId(), 0);
-			topCountMap.put(p.getId(), 0);
-			avoidLastCountMap.put(p.getId(), 0);
+		/*
+		 * 集計用Mapを初期化する
+		 *
+		 * まだ試合結果がないプレイヤーもランキングに出せるように、
+		 * 最初に全プレイヤー分の初期値を入れておく
+		 */
+		for (Player player : players) {
+			Long playerId = player.getId();
+
+			pointMap.put(playerId, 0.0);
+			gameCountMap.put(playerId, 0);
+			maxScoreMap.put(playerId, 0);
+			topCountMap.put(playerId, 0);
+			avoidLastCountMap.put(playerId, 0);
 		}
 
-		// 集計
-		for (MatchResult r : results) {
-			Long playerId = r.getPlayer().getId();
+		/*
+		 * 試合結果をもとに各プレイヤーの成績を集計する
+		 */
+		for (MatchResult result : results) {
+			Long playerId = result.getPlayer().getId();
 
-			//          ポイント
-			pointMap.put(playerId,
-					pointMap.get(playerId) + r.getPoint());
-			//          試合数
-			gameCountMap.put(playerId,
+			// 合計ポイント
+			pointMap.put(
+					playerId,
+					pointMap.get(playerId) + result.getPoint());
+
+			// 試合数
+			gameCountMap.put(
+					playerId,
 					gameCountMap.get(playerId) + 1);
 
 			// 最高スコア
-			if (r.getScore() > maxScoreMap.get(playerId)) {
-				maxScoreMap.put(playerId, r.getScore());
+			if (result.getScore() > maxScoreMap.get(playerId)) {
+				maxScoreMap.put(playerId, result.getScore());
 			}
 
 			// トップ回数
-			if (r.getRankOrder() == 1) {
-				topCountMap.put(playerId, topCountMap.get(playerId) + 1);
+			if (result.getRankOrder() == 1) {
+				topCountMap.put(
+						playerId,
+						topCountMap.get(playerId) + 1);
 			}
 
 			// 4着回避回数
-			if (r.getRankOrder() != 4) {
-				avoidLastCountMap.put(playerId, avoidLastCountMap.get(playerId) + 1);
+			if (result.getRankOrder() != 4) {
+				avoidLastCountMap.put(
+						playerId,
+						avoidLastCountMap.get(playerId) + 1);
 			}
 		}
 
-		// 並び替え用リスト
+		/*
+		 * Thymeleafで扱いやすいように、
+		 * プレイヤーごとの情報をMap形式にまとめる
+		 */
 		List<Map<String, Object>> rankingList = new ArrayList<>();
 
-		for (Player p : players) {
-			Map<String, Object> map = new HashMap<>();
+		for (Player player : players) {
+			Long playerId = player.getId();
 
-			Long playerId = p.getId();
 			int games = gameCountMap.get(playerId);
 			int avoidLastCount = avoidLastCountMap.get(playerId);
 
 			double avoidLastRate = 0.0;
+
 			if (games > 0) {
 				avoidLastRate = avoidLastCount * 100.0 / games;
 			}
 
-			//			mapにデータを入れる
-			map.put("name", p.getName());
-			map.put("point", pointMap.get(playerId));
-			map.put("games", games);
-			map.put("maxScore", maxScoreMap.get(playerId));
-			map.put("topCount", topCountMap.get(playerId));
-			map.put("avoidLastRate", avoidLastRate);
-			map.put("iconPath", p.getIconPath());
+			Map<String, Object> rankingData = new HashMap<>();
 
-			rankingList.add(map);
+			rankingData.put("name", player.getName());
+			rankingData.put("iconPath", player.getIconPath());
+
+			rankingData.put("point", pointMap.get(playerId));
+			rankingData.put("games", games);
+			rankingData.put("maxScore", maxScoreMap.get(playerId));
+			rankingData.put("topCount", topCountMap.get(playerId));
+			rankingData.put("avoidLastRate", avoidLastRate);
+
+			rankingList.add(rankingData);
 		}
 
-		// ポイント順でソート
-		rankingList.sort((a, b) -> Double.compare((Double) b.get("point"), (Double) a.get("point")));
-
+		/*
+		 * プレイヤーが1人もいない場合
+		 *
+		 * 空のランキングリストを画面へ渡して終了する
+		 */
 		if (rankingList.isEmpty()) {
-		    model.addAttribute("pointRanking", rankingList);
-		    model.addAttribute("maxScoreRanking", rankingList);
-		    model.addAttribute("avoidLastRanking", rankingList);
-		    model.addAttribute("topCountRanking", rankingList);
-		    return "ranking";
-		}
-		// 1位との差計算
-		double topPoint = (double) rankingList.get(0).get("point");
+			model.addAttribute("pointRanking", rankingList);
+			model.addAttribute("maxScoreRanking", rankingList);
+			model.addAttribute("avoidLastRanking", rankingList);
+			model.addAttribute("topCountRanking", rankingList);
+			model.addAttribute("targetGamesPerPlayer", targetGamesPerPlayer);
 
-		for (Map<String, Object> r : rankingList) {
-			double diff = topPoint - (double) r.get("point");
-			r.put("diff", diff);
+			return "ranking";
 		}
-		
+
+		/*
+		 * メインランキング
+		 *
+		 * 合計ポイントが高い順に並べる
+		 */
 		List<Map<String, Object>> pointRanking = new ArrayList<>(rankingList);
-		pointRanking.sort((a, b) ->
-		    Double.compare((Double) b.get("point"), (Double) a.get("point"))
-		);
 
+		pointRanking.sort((a, b) -> Double.compare(
+				(Double) b.get("point"),
+				(Double) a.get("point")));
+
+		/*
+		 * 1位との差を計算する
+		 *
+		 * 例:
+		 * 1位  120.0pt → 差 0.0
+		 * 2位  100.0pt → 差 20.0
+		 */
+		double topPoint = (double) pointRanking.get(0).get("point");
+
+		for (Map<String, Object> rankingData : pointRanking) {
+			double diff = topPoint - (double) rankingData.get("point");
+			rankingData.put("diff", diff);
+		}
+
+		/*
+		 * 最高スコアランキング
+		 *
+		 * 最高スコアが高い順に並べる
+		 */
 		List<Map<String, Object>> maxScoreRanking = new ArrayList<>(rankingList);
-		maxScoreRanking.sort((a, b) ->
-		    Integer.compare((Integer) b.get("maxScore"), (Integer) a.get("maxScore"))
-		);
 
+		maxScoreRanking.sort((a, b) -> Integer.compare(
+				(Integer) b.get("maxScore"),
+				(Integer) a.get("maxScore")));
+
+		/*
+		 * 4着回避率ランキング
+		 *
+		 * 4着を回避した割合が高い順に並べる
+		 */
 		List<Map<String, Object>> avoidLastRanking = new ArrayList<>(rankingList);
-		avoidLastRanking.sort((a, b) ->
-		    Double.compare((Double) b.get("avoidLastRate"), (Double) a.get("avoidLastRate"))
-		);
 
+		avoidLastRanking.sort((a, b) -> Double.compare(
+				(Double) b.get("avoidLastRate"),
+				(Double) a.get("avoidLastRate")));
+
+		/*
+		 * 最多トップランキング
+		 *
+		 * 1位回数が多い順に並べる
+		 */
 		List<Map<String, Object>> topCountRanking = new ArrayList<>(rankingList);
-		topCountRanking.sort((a, b) ->
-		    Integer.compare((Integer) b.get("topCount"), (Integer) a.get("topCount"))
-		);
 
+		topCountRanking.sort((a, b) -> Integer.compare(
+				(Integer) b.get("topCount"),
+				(Integer) a.get("topCount")));
+
+		/*
+		 * ranking.html に渡すデータ
+		 */
 		model.addAttribute("pointRanking", pointRanking);
 		model.addAttribute("maxScoreRanking", maxScoreRanking);
 		model.addAttribute("avoidLastRanking", avoidLastRanking);
 		model.addAttribute("topCountRanking", topCountRanking);
 
-		model.addAttribute("ranking", rankingList);
+		/*
+		 * 1人あたりの目標試合数
+		 *
+		 * 画面側で
+		 * 3/10
+		 * のように表示するために使う
+		 */
+		model.addAttribute("targetGamesPerPlayer", targetGamesPerPlayer);
 
 		return "ranking";
 	}

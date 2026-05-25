@@ -50,7 +50,7 @@
 				<div class="diff" th:text="${stat.index == 0 ? '—' : #numbers.formatDecimal(r.diff, 1, 1) + 'pt'}">
 				</div>
 
-				<div class="games" th:text="${r.games} + '/18'"></div>
+				<div class="games" th:text="${r.games} + '/' + ${targetGamesPerPlayer}"></div>
 			</div>
 		</section>
 

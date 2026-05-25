@@ -11,5 +11,7 @@ import com.snow.mahjong.entity.MatchPlayer;
 public interface MatchPlayerRepository extends JpaRepository<MatchPlayer, Long> {
 	
 	List<MatchPlayer> findByMatchIdOrderBySeatOrder(Long matchId);
+	
+	List<MatchPlayer> findAllByOrderByMatchIdAscSeatOrderAsc();
 
 }

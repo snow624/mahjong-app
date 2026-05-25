@@ -3,13 +3,9 @@
 
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<!-- reset css -->
 	<link rel="stylesheet" href="https://unpkg.com/destyle.css@1.0.5/destyle.css" />
-	<!-- css -->
-	<link rel="stylesheet" href="/css/style.css">
-	<!-- ファビコン -->
+	<link rel="stylesheet" href="/css/style.css?v=6">
 	<link rel="icon" href="/img/favicon.ico" sizes="any" />
-	<!-- fontawesome -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
 
 	<title>管理者ログイン</title>
@@ -18,31 +14,37 @@
 <body>
 	<main class="page-container">
 
-		<!-- 管理者ログイン画面 -->
 		<div class="top-title">
 			<h1>ADMIN</h1>
 			<h3>管理者ログイン</h3>
 		</div>
 
-		<div class="form-card">
+		<section class="admin-login-card">
+			<div class="admin-login-icon">
+				<i class="fa-solid fa-lock"></i>
+			</div>
 
-			<!-- エラーメッセージ -->
-			<p th:if="${error}" class="error-message" th:text="${error}"></p>
+			<h2>管理者専用ページ</h2>
+			<p class="admin-login-note">
+				試合枠作成・対戦表作成・削除を行うには、管理者パスワードを入力してください。
+			</p>
 
-			<!-- 管理者ログインフォーム -->
+			<p th:if="${error}" class="error-message admin-login-error" th:text="${error}"></p>
+
 			<form action="/matches/admin/login" method="post">
 				<div class="form-group">
 					<label>管理者パスワード</label>
-					<input type="password" name="password">
+					<input type="password" name="password" placeholder="パスワードを入力">
 				</div>
 
-				<button class="primary-button" type="submit">
+				<button class="primary-button admin-login-button" type="submit">
+					<i class="fa-solid fa-right-to-bracket"></i>
 					ログイン
 				</button>
 			</form>
-		</div>
+		</section>
 
-		<a href="/matches" class="primary-link-button">
+		<a href="/matches" class="primary-link-button admin-back-button">
 			試合一覧へ戻る
 		</a>
 

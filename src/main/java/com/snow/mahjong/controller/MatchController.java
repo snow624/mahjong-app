@@ -26,12 +26,13 @@ import com.snow.mahjong.repository.MatchPlayerRepository;
 import com.snow.mahjong.repository.MatchRepository;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
+import org.springframework.beans.factory.annotation.Value;
 
 @Controller
 public class MatchController {
 
-	// 1人あたり何試合くらい出場させたいか
-	private static final int TARGET_GAMES_PER_PLAYER = 15;
+	@Value("${app.target-games-per-player}")
+	private int targetGamesPerPlayer;
 
 	// 1試合あたりの人数
 	private static final int PLAYERS_PER_MATCH = 4;
@@ -168,7 +169,7 @@ public class MatchController {
 	 *
 	 * 役割:
 	 * - 登録プレイヤー数から必要な試合数を自動計算する
-	 * - 1人15試合くらいになるように試合枠を作る
+	 * - 1人10試合くらいになるように試合枠を作る
 	 * - 既に試合枠がある場合は、足りない分だけ追加する
 	 */
 	@PostMapping("/matches/init")
@@ -186,7 +187,7 @@ public class MatchController {
 		}
 
 		int requiredMatchCount = (int) Math.ceil(
-				players.size() * TARGET_GAMES_PER_PLAYER / (double) PLAYERS_PER_MATCH);
+				players.size() * targetGamesPerPlayer / (double) PLAYERS_PER_MATCH);
 
 		long currentMatchCount = matchRepository.count();
 
@@ -380,13 +381,13 @@ public class MatchController {
 
 		if (playerCount >= PLAYERS_PER_MATCH) {
 			requiredMatchCount = (int) Math.ceil(
-					playerCount * TARGET_GAMES_PER_PLAYER / (double) PLAYERS_PER_MATCH);
+					playerCount * targetGamesPerPlayer / (double) PLAYERS_PER_MATCH);
 		}
 
 		model.addAttribute("playerCount", playerCount);
 		model.addAttribute("matchCount", matchCount);
 		model.addAttribute("requiredMatchCount", requiredMatchCount);
-		model.addAttribute("targetGamesPerPlayer", TARGET_GAMES_PER_PLAYER);
+		model.addAttribute("targetGamesPerPlayer", targetGamesPerPlayer);
 	}
 
 	/*
