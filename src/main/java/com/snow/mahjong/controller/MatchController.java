@@ -169,7 +169,7 @@ public class MatchController {
 	 *
 	 * 役割:
 	 * - 登録プレイヤー数から必要な試合数を自動計算する
-	 * - 1人10試合くらいになるように試合枠を作る
+	 * - 全員が同じ試合数になるように試合枠を作る
 	 * - 既に試合枠がある場合は、足りない分だけ追加する
 	 */
 	@PostMapping("/matches/init")
@@ -186,8 +186,9 @@ public class MatchController {
 			return "match_admin";
 		}
 
-		int requiredMatchCount = (int) Math.ceil(
-				players.size() * targetGamesPerPlayer / (double) PLAYERS_PER_MATCH);
+		// 全員が同じ試合数になるように計算
+		// 必要な試合数 = プレイヤー数 × 目標試合数 ÷ 4
+		int requiredMatchCount = (players.size() * targetGamesPerPlayer) / PLAYERS_PER_MATCH;
 
 		long currentMatchCount = matchRepository.count();
 
@@ -380,8 +381,7 @@ public class MatchController {
 		int requiredMatchCount = 0;
 
 		if (playerCount >= PLAYERS_PER_MATCH) {
-			requiredMatchCount = (int) Math.ceil(
-					playerCount * targetGamesPerPlayer / (double) PLAYERS_PER_MATCH);
+			requiredMatchCount = (int) (playerCount * targetGamesPerPlayer / PLAYERS_PER_MATCH);
 		}
 
 		model.addAttribute("playerCount", playerCount);

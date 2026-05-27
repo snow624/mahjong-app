@@ -11,8 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.snow.mahjong.entity.Match;
 import com.snow.mahjong.entity.MatchResult;
 import com.snow.mahjong.entity.Player;
+import com.snow.mahjong.repository.MatchRepository;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
 
@@ -38,18 +40,8 @@ public class RankingController {
 	@Autowired
 	private MatchResultRepository matchResultRepository;
 
-	/*
-	 * 1人あたりの目標試合数
-	 *
-	 * application.properties の
-	 * app.target-games-per-player
-	 * を読み込む
-	 *
-	 * 例:
-	 * app.target-games-per-player=10
-	 */
-	@Value("${app.target-games-per-player}")
-	private int targetGamesPerPlayer;
+	@Autowired
+	private MatchRepository matchRepository;
 
 	/*
 	 * ランキング画面
@@ -68,6 +60,14 @@ public class RankingController {
 
 		// 入力済みの試合結果を全件取得
 		List<MatchResult> results = matchResultRepository.findAll();
+
+		// 試合数から実際の目標試合数を計算
+		// 目標試合数 = 試合数 × 4 ÷ プレイヤー数
+		int targetGamesPerPlayer = 0;
+		if (players.size() > 0) {
+			long matchCount = matchRepository.count();
+			targetGamesPerPlayer = (int) ((matchCount * 4) / players.size());
+		}
 
 		/*
 		 * プレイヤーごとの集計用Map
