@@ -104,7 +104,7 @@ tr:hover {
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: var(--color-nav-bg);
+	background-color: var(--color-main-green);
 	border-top: 1px solid var(--color-border);
 	display: flex;
 	justify-content: space-around;
@@ -201,6 +201,7 @@ tr:hover {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	color: ver(--color-dark-text);
 }
 
 .point,
