@@ -42,6 +42,11 @@ public class RankingController {
 
 	@Autowired
 	private MatchRepository matchRepository;
+	
+	@GetMapping("/")
+    public String index() {
+        return "redirect:/ranking";
+    }
 
 	/*
 	 * ランキング画面
