@@ -134,6 +134,13 @@ tr:hover {
 	padding: 22px 14px 24px;
 	box-shadow: var(--shadow-card);
 }
+.logo-container{
+	display: flex;
+	    justify-content: center;
+}
+.logo{
+	width: 100%;
+}
 
 .main-ranking .top-title {
 	padding-bottom: 18px;
