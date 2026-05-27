@@ -61,27 +61,91 @@ public class MatchController {
 	 * - 試合一覧を表示する
 	 * - 各試合に参加するプレイヤーを表示する
 	 * - 入力済みの順位・ポイントも表示する
+	 * - 選択されたプレイヤーが含まれる試合を優先表示する
+	 *
+	 * クエリパラメータ:
+	 * - playerIds: カンマ区切りのプレイヤーID（複数選択可能）
+	 *   例: /matches?playerIds=1,2,5
 	 */
 	@GetMapping("/matches")
-	public String list(Model model) {
+	public String list(@RequestParam(required = false) String playerIds, Model model) {
+		// 1回のクエリでMatchを取得
 		List<Match> matches = matchRepository.findAll();
 
+		// JOIN FETCHで一度にPlayerデータも取得（N+1問題を解決）
+		List<MatchPlayer> allMatchPlayers = matchPlayerRepository.findAllWithPlayer();
+		List<MatchResult> allMatchResults = matchResultRepository.findAllWithPlayer();
+
+		// メモリ上でマッピング（これ以上クエリは発生しない）
 		Map<Long, List<MatchPlayer>> playerMap = new HashMap<>();
 		Map<Long, List<MatchResult>> resultMap = new HashMap<>();
 
-		for (Match match : matches) {
-			playerMap.put(
-					match.getId(),
-					matchPlayerRepository.findByMatchIdOrderBySeatOrder(match.getId()));
-
-			resultMap.put(
-					match.getId(),
-					matchResultRepository.findByMatchId(match.getId()));
+		for (MatchPlayer mp : allMatchPlayers) {
+			playerMap.computeIfAbsent(mp.getMatch().getId(), k -> new ArrayList<>()).add(mp);
 		}
+
+		for (MatchResult mr : allMatchResults) {
+			resultMap.computeIfAbsent(mr.getMatch().getId(), k -> new ArrayList<>()).add(mr);
+		}
+
+		// プレイヤーフィルタリングロジック
+		List<Long> selectedPlayerIds = new ArrayList<>();
+		if (playerIds != null && !playerIds.isEmpty()) {
+			String[] ids = playerIds.split(",");
+			for (String id : ids) {
+				try {
+					selectedPlayerIds.add(Long.parseLong(id.trim()));
+				} catch (NumberFormatException e) {
+					// スキップ
+				}
+			}
+		}
+
+		// 選択されたプレイヤーがいる場合、フィルタリング＆ソート
+		if (!selectedPlayerIds.isEmpty()) {
+			matches.sort((m1, m2) -> {
+				List<MatchPlayer> players1 = playerMap.getOrDefault(m1.getId(), new ArrayList<>());
+				List<MatchPlayer> players2 = playerMap.getOrDefault(m2.getId(), new ArrayList<>());
+
+				// 試合に参加するプレイヤーIDのセットを取得
+				List<Long> matchPlayers1 = new ArrayList<>();
+				for (MatchPlayer mp : players1) {
+					matchPlayers1.add(mp.getPlayer().getId());
+				}
+
+				List<Long> matchPlayers2 = new ArrayList<>();
+				for (MatchPlayer mp : players2) {
+					matchPlayers2.add(mp.getPlayer().getId());
+				}
+
+				// 選択されたプレイヤーのマッチ数を数える
+				int count1 = 0;
+				for (Long selectedId : selectedPlayerIds) {
+					if (matchPlayers1.contains(selectedId)) {
+						count1++;
+					}
+				}
+
+				int count2 = 0;
+				for (Long selectedId : selectedPlayerIds) {
+					if (matchPlayers2.contains(selectedId)) {
+						count2++;
+					}
+				}
+
+				// 多くマッチしている方を上位に（降順）
+				return Integer.compare(count2, count1);
+			});
+		}
+
+		// 全プレイヤーを取得してビューに渡す
+		List<Player> allPlayers = playerRepository.findAll();
 
 		model.addAttribute("matches", matches);
 		model.addAttribute("playerMap", playerMap);
 		model.addAttribute("resultMap", resultMap);
+		model.addAttribute("allPlayers", allPlayers);
+		model.addAttribute("selectedPlayerIds", selectedPlayerIds);
 
 		return "matches";
 	}
@@ -98,7 +162,8 @@ public class MatchController {
 	@GetMapping("/matches/{id}")
 	public String detail(@PathVariable Long id, Model model) {
 		Match match = matchRepository.findById(id).orElse(null);
-		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdOrderBySeatOrder(id);
+		// JOIN FETCHで最適化済みクエリを使用
+		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdWithPlayer(id);
 
 		model.addAttribute("match", match);
 		model.addAttribute("players", players);
@@ -232,8 +297,15 @@ public class MatchController {
 
 		List<Match> matches = matchRepository.findAll();
 
+		// N+1問題を避けるため、全MatchPlayerを一度に取得
+		List<MatchPlayer> allMatchPlayers = matchPlayerRepository.findAllByOrderByMatchIdAscSeatOrderAsc();
+		Map<Long, List<MatchPlayer>> matchPlayerMap = new HashMap<>();
+		for (MatchPlayer mp : allMatchPlayers) {
+			matchPlayerMap.computeIfAbsent(mp.getMatch().getId(), k -> new ArrayList<>()).add(mp);
+		}
+
 		for (Match match : matches) {
-			List<MatchPlayer> existingPlayers = matchPlayerRepository.findByMatchIdOrderBySeatOrder(match.getId());
+			List<MatchPlayer> existingPlayers = matchPlayerMap.getOrDefault(match.getId(), new ArrayList<>());
 
 			if (!existingPlayers.isEmpty()) {
 				continue;

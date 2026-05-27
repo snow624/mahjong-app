@@ -972,3 +972,111 @@ tr:hover {
 	justify-content: center;
 	gap: 8px;
 }
+
+/* =========================
+   Player Filter Form (Matches)
+========================= */
+.player-filter-form {
+	background-color: var(--color-card);
+	border: 1px solid var(--color-border);
+	border-radius: 12px;
+	padding: 20px;
+	margin-bottom: 24px;
+}
+
+.player-filter-header {
+	margin-bottom: 16px;
+}
+
+.player-filter-header h4 {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--color-text);
+}
+
+.player-filter-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+.player-filter-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.player-filter-item input[type="checkbox"] {
+	cursor: pointer;
+	width: 18px;
+	height: 18px;
+	accent-color: var(--color-main-green);
+}
+
+.player-filter-item label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	flex: 1;
+}
+
+.filter-player-icon {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.player-filter-item label span {
+	font-size: 0.85rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.player-filter-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+}
+
+.filter-button {
+	flex: 1;
+	max-width: 150px;
+	padding: 10px 16px;
+	background-color: var(--color-main-green);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.filter-button:hover {
+	background-color: #065c2a;
+}
+
+.filter-reset-button {
+	flex: 1;
+	max-width: 150px;
+	padding: 10px 16px;
+	background-color: var(--color-border);
+	color: var(--color-text);
+	border: none;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s;
+}
+
+.filter-reset-button:hover {
+	background-color: #555;
+}

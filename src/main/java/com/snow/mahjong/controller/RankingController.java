@@ -58,8 +58,8 @@ public class RankingController {
 		// 登録済みプレイヤーを全件取得
 		List<Player> players = playerRepository.findAll();
 
-		// 入力済みの試合結果を全件取得
-		List<MatchResult> results = matchResultRepository.findAll();
+		// 入力済みの試合結果をPlayerと一緒に取得（N+1問題を回避）
+		List<MatchResult> results = matchResultRepository.findAllWithPlayer();
 
 		// 試合数から実際の目標試合数を計算
 		// 目標試合数 = 試合数 × 4 ÷ プレイヤー数

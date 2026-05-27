@@ -25,6 +25,34 @@
 			<h3>試合一覧</h3>
 		</div>
 
+		<!-- プレイヤー選択フォーム -->
+		<form method="get" class="player-filter-form">
+			<div class="player-filter-header">
+				<h4>参加メンバーで絞り込み</h4>
+			</div>
+
+			<div class="player-filter-grid">
+				<div th:each="p : ${allPlayers}" class="player-filter-item">
+					<input type="checkbox" 
+						th:id="${'player-' + p.id}" 
+						name="playerIds" 
+						th:value="${p.id}"
+						th:checked="${selectedPlayerIds.contains(p.id)}">
+					<label th:for="${'player-' + p.id}">
+						<img class="filter-player-icon" 
+							th:src="${p.iconPath != null ? p.iconPath : '/images/default.png'}"
+							th:alt="${p.name}">
+						<span th:text="${p.name}"></span>
+					</label>
+				</div>
+			</div>
+
+			<div class="player-filter-actions">
+				<button type="submit" class="filter-button">絞り込み</button>
+				<a href="/matches" class="filter-reset-button">リセット</a>
+			</div>
+		</form>
+
 		<section th:each="m : ${matches}" class="match-card">
 			<a th:href="@{'/matches/' + ${m.id}}" class="match-link">
 				<div class="match-title" th:classappend="${#lists.size(resultMap[m.id]) > 0} ? ' is-completed'"
