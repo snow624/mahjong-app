@@ -19,17 +19,19 @@
 	<main class="page-container">
 		<div class="top-title">
 			<h1>PLAYER</h1>
-			<h3>選手一覧</h3>
+			<h3>選手一覧 / 紹介</h3>
 		</div>
-
-		<a href="/players/new" class="primary-link-button">新規登録</a>
 
 		<div th:each="p : ${players}" class="player-card">
 			<img th:src="${p.iconPath != null ? p.iconPath : '/images/default.png'}">
-			<div class="player-card-name" th:text="${p.name}"></div>
+			<div class="player-card-content">
+				<div class="player-card-name" th:text="${p.name}"></div>
+			</div>
 			<a class="player-card-edit" th:href="@{'/players/' + ${p.id} + '/edit'}">編集</a>
 			<a class="player-card-delete" th:href="@{'/players/' + ${p.id} + '/delete'}">削除</a>
 		</div>
+
+		<a href="/players/new" class="primary-link-button">新規登録</a>
 	</main>
 
 	<div th:replace="~{fragments/nav :: bottomNav}"></div>

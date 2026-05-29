@@ -219,7 +219,7 @@ tr:hover {
 
 .player-name {
 	min-width: 0;
-	font-size: 15px;
+	font-size: 10px;
 	font-weight: 800;
 	line-height: 1.2;
 	white-space: nowrap;
@@ -240,7 +240,7 @@ tr:hover {
 .league-info {
 	color: var(--color-dark-text);
 	padding: 18px 16px;
-	margin-bottom: 20px;
+	margin-bottom: 10px;
 	line-height: 1.7;
 }
 
@@ -340,7 +340,7 @@ tr:hover {
 
 .sub-ranking-name {
 	min-width: 0;
-	font-size: 16px;
+	font-size: 12px;
 	font-weight: 800;
 	line-height: 1.2;
 	white-space: nowrap;
@@ -429,7 +429,7 @@ tr:hover {
 }
 
 .match-player-name {
-	font-size: 15px;
+	font-size: 12px;
 	font-weight: 700;
 	line-height: 1.2;
 }
@@ -475,11 +475,17 @@ tr:hover {
 	height: 56px;
 	border-radius: 50%;
 	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.player-card-content {
+	flex: 1;
+	min-width: 0;
 }
 
 .player-card-name {
 	flex: 1;
-	font-size: 20px;
+	font-size: 14px;
 	font-weight: 700;
 }
 
@@ -501,7 +507,7 @@ tr:hover {
 ========================= */
 .form-card {
 	border-radius: 18px;
-	padding: 24px 18px;
+	padding: 18px;
 }
 
 .edit-icon-preview {
@@ -534,7 +540,7 @@ tr:hover {
 	padding: 12px;
 	border: 1px solid #ddd;
 	border-radius: 10px;
-	font-size: 16px;
+	font-size: 14px;
 }
 
 .primary-button {
@@ -1080,10 +1086,11 @@ tr:hover {
 }
 
 .player-filter-item label span {
-	font-size: 0.85rem;
+	font-size: 0.75rem;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	max-width: 64px;
 }
 
 .player-filter-actions {

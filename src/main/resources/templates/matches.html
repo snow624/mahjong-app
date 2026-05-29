@@ -42,7 +42,7 @@
 						<img class="filter-player-icon" 
 							th:src="${p.iconPath != null ? p.iconPath : '/images/default.png'}"
 							th:alt="${p.name}">
-						<span th:text="${p.name}"></span>
+						<span th:text="${p.name.length() > 5 ? p.name.substring(0, 5) : p.name}" th:title="${p.name}"></span>
 					</label>
 				</div>
 			</div>
