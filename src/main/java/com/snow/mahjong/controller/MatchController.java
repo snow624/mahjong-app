@@ -297,8 +297,8 @@ public class MatchController {
 
 		List<Match> matches = matchRepository.findAll();
 
-		// N+1問題を避けるため、全MatchPlayerを一度に取得
-		List<MatchPlayer> allMatchPlayers = matchPlayerRepository.findAllByOrderByMatchIdAscSeatOrderAsc();
+		// N+1問題を避けるため、全MatchPlayerを一度に取得（JOIN FETCHで最適化）
+		List<MatchPlayer> allMatchPlayers = matchPlayerRepository.findAllWithPlayer();
 		Map<Long, List<MatchPlayer>> matchPlayerMap = new HashMap<>();
 		for (MatchPlayer mp : allMatchPlayers) {
 			matchPlayerMap.computeIfAbsent(mp.getMatch().getId(), k -> new ArrayList<>()).add(mp);

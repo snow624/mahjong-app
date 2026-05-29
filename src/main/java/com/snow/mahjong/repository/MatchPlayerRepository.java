@@ -19,6 +19,7 @@ public interface MatchPlayerRepository extends JpaRepository<MatchPlayer, Long> 
 	// PlayerオブジェクトをJOIN FETCHで一緒に取得
 	@Query("SELECT mp FROM MatchPlayer mp "
 			+ "LEFT JOIN FETCH mp.player "
+			+ "LEFT JOIN FETCH mp.match "
 			+ "ORDER BY mp.match.id ASC, mp.seatOrder ASC")
 	List<MatchPlayer> findAllWithPlayer();
 
