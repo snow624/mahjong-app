@@ -147,7 +147,6 @@ tr:hover {
 .logo-container {
 	display: flex;
 	justify-content: center;
-	margin-bottom: 10px;
 }
 
 .logo-container img {
@@ -810,6 +809,7 @@ tr:hover {
 	font-weight: 700;
 	color: #718093;
 }
+
 /* エラーメッセージ */
 .admin-error {
 	max-width: 680px;

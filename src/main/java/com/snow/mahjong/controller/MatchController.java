@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -267,13 +269,14 @@ public class MatchController {
 	}
 
 	/*
-	 * 対戦表作成
+	 * 対戦表作成（改善版）
 	 * URL: /matches/generate
 	 *
 	 * 役割:
 	 * - 試合枠に対してプレイヤー4人を割り当てる
+	 * - 全試合を通じてプレイヤーの重複を最小限にする
 	 * - 出場回数が少ない人から優先して選ぶ
-	 * - 同じ出場回数の人はランダムにする
+	 * - 既に対戦済みの組み合わせを避ける
 	 * - 既にメンバーが入っている試合はスキップする
 	 */
 	@PostMapping("/matches/generate")
@@ -300,8 +303,20 @@ public class MatchController {
 		// N+1問題を避けるため、全MatchPlayerを一度に取得（JOIN FETCHで最適化）
 		List<MatchPlayer> allMatchPlayers = matchPlayerRepository.findAllWithPlayer();
 		Map<Long, List<MatchPlayer>> matchPlayerMap = new HashMap<>();
+		Set<Set<Long>> usedCombinations = new HashSet<>();
+		
 		for (MatchPlayer mp : allMatchPlayers) {
 			matchPlayerMap.computeIfAbsent(mp.getMatch().getId(), k -> new ArrayList<>()).add(mp);
+			
+			// 既に対戦済みの組み合わせを記録
+			List<MatchPlayer> matchPlayers = matchPlayerMap.get(mp.getMatch().getId());
+			if (matchPlayers.size() == PLAYERS_PER_MATCH) {
+				Set<Long> combination = new HashSet<>();
+				for (MatchPlayer player : matchPlayers) {
+					combination.add(player.getPlayer().getId());
+				}
+				usedCombinations.add(combination);
+			}
 		}
 
 		for (Match match : matches) {
@@ -311,13 +326,11 @@ public class MatchController {
 				continue;
 			}
 
-			Collections.shuffle(players);
-			players.sort(Comparator.comparing(player -> playCount.get(player.getId())));
-
-			List<Player> selectedPlayers = players.subList(0, PLAYERS_PER_MATCH);
+			// 改善版：重複を避けながらプレイヤーを選出
+			List<Player> selectedPlayers = selectPlayersWithoutDuplication(
+					players, playCount, usedCombinations);
 
 			int seatOrder = 1;
-
 			for (Player player : selectedPlayers) {
 				MatchPlayer matchPlayer = new MatchPlayer();
 				matchPlayer.setMatch(match);
@@ -327,9 +340,80 @@ public class MatchController {
 
 				playCount.put(player.getId(), playCount.get(player.getId()) + 1);
 			}
+			
+			// 新規選出された組み合わせを記録
+			Set<Long> newCombination = new HashSet<>();
+			for (Player player : selectedPlayers) {
+				newCombination.add(player.getId());
+			}
+			usedCombinations.add(newCombination);
 		}
 
 		return "redirect:/matches";
+	}
+
+	/*
+	 * 重複を避けながらプレイヤーを選出するメソッド
+	 * 
+	 * 戦略:
+	 * 1. 出場回数が最も少ないプレイヤーを基軸に選ぶ
+	 * 2. その基軸プレイヤーと一度も対戦したことのない3人を探す
+	 * 3. 対戦済み組み合わせがない場合は、出場回数のバランスを取りながら選ぶ
+	 */
+	private List<Player> selectPlayersWithoutDuplication(
+			List<Player> allPlayers,
+			Map<Long, Integer> playCount,
+			Set<Set<Long>> usedCombinations) {
+		
+		// 出場回数でソート（少ない順）
+		List<Player> sortedPlayers = new ArrayList<>(allPlayers);
+		sortedPlayers.sort(Comparator.comparing(player -> playCount.get(player.getId())));
+		
+		// 最も出場回数が少ないプレイヤーから始める
+		int maxAttempts = allPlayers.size() * PLAYERS_PER_MATCH;
+		int attempts = 0;
+
+		while (attempts < maxAttempts) {
+			// ランダムに基軸プレイヤーを選ぶ（毎回異なる組み合わせを目指す）
+			Collections.shuffle(sortedPlayers);
+			List<Player> candidates = new ArrayList<>(sortedPlayers);
+			
+			// 出場回数が少ない順に再ソート
+			candidates.sort(Comparator.comparing(player -> playCount.get(player.getId())));
+			
+			// 基軸プレイヤーを選出
+			Player basePlayer = candidates.get(0);
+			List<Player> selected = new ArrayList<>();
+			selected.add(basePlayer);
+			
+			// 残りの3人を選ぶ
+			for (Player candidate : candidates) {
+				if (selected.size() >= PLAYERS_PER_MATCH) {
+					break;
+				}
+				if (candidate.getId().equals(basePlayer.getId())) {
+					continue;
+				}
+				selected.add(candidate);
+			}
+			
+			// 選出した組み合わせが未使用かチェック
+			Set<Long> combination = new HashSet<>();
+			for (Player player : selected) {
+				combination.add(player.getId());
+			}
+			
+			if (!usedCombinations.contains(combination)) {
+				return selected;
+			}
+			
+			attempts++;
+		}
+		
+		// 最終手段：最も出場回数が少ない4人を選ぶ
+		List<Player> fallback = new ArrayList<>(sortedPlayers);
+		fallback.sort(Comparator.comparing(player -> playCount.get(player.getId())));
+		return fallback.subList(0, PLAYERS_PER_MATCH);
 	}
 
 	/*
