@@ -1,10 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
-<nav th:fragment="bottomNav" class="bottom-nav">
-    <a href="/">🏆<span>順位</span></a>
-    <a href="/matches">🀄<span>試合</span></a>
-    <a href="/players">👤<span>選手</span></a>
-</nav>
+	<nav th:fragment="bottomNav" class="bottom-nav">
+		<a href="/">
+			<img src="/img/nav-ranking.png" alt="順位" class="nav-icon">
+			<span>ランキング</span>
+		</a>
+		<a href="/matches">
+			<img src="/img/nav-matches.png" alt="試合" class="nav-icon">
+			<span>試合</span>
+		</a>
+		<a href="/players">
+			<img src="/img/nav-players.png" alt="選手" class="nav-icon">
+			<span>プレイヤー</span>
+		</a>
+	</nav>
 </body>
+
 </html>

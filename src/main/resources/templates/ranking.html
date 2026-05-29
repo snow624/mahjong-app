@@ -20,6 +20,21 @@
 		<div class="logo-container">
 			<img src="/img/MAHJONG.png" alt="MAHJONG" class="logo">
 		</div>
+		<div class="league-info">
+			<h2>What is K.LEAGUE</h2>
+			<p>
+				(Mリーグ風)<br>
+				第1回Kリーグ!!<br>
+				2026年5月31日から開催されます!!<br>
+				はりきってアプリまで作りました。
+				<br>
+				・対戦テーブルは「試合一覧」画面から確認できます。<br>
+				・試合終了後は、試合タイトルを押すと点数入力ができます。<br>
+				・スコアブックにも点数の記載をお願いします。<br>
+				・ランキングはアプリ上で確認できます。<br>
+				不具合あれば教えてください。。
+			</p>
+		</div>
 
 		<!-- メインランキング -->
 		<section class="main-ranking">
@@ -104,8 +119,8 @@
 
 					<div class="sub-ranking-name" th:text="${r.name}"></div>
 
-					<div class="sub-ranking-value"
-						th:text="${#numbers.formatDecimal(r.avoidLastRate, 1, 1)} + '%'"></div>
+					<div class="sub-ranking-value" th:text="${#numbers.formatDecimal(r.avoidLastRate, 1, 1)} + '%'">
+					</div>
 				</div>
 			</div>
 
