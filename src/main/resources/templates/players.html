@@ -22,6 +22,85 @@
 			<h3>選手一覧 / 紹介</h3>
 		</div>
 
+		<section class="team-section">
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/009.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>コジ<span class="at">@終末の観測者</span></h2>
+					<p>局面を静観し虎視眈々と終末へと歩み出す</p>
+					<p>世界が終わるその時残るのはただ我独り</p>
+				</div>
+			</div>
+
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/012.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>コバ<span class="at">@災厄の化身</span></h2>
+					<p>吹き荒れる灰の中、その中を蹂躙し笑う</p>
+					<p>一挙手一投足ですべてを破滅へ誘う</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/013.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>ユキ<span class="at">@滅びの詠唱者</span></h2>
+					<p>すべての運命が覆る静寂の中の一声</p>
+					<p>その発声を聞いた者はみな塵に還るのみ</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/020.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>コウセイ<span class="at">@宵闇の断罪者</span></h2>
+					<p>一瞬の隙をも見逃さない洞察力</p>
+					<p>見咎められた者の行く末は闇</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/006.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>タカアヤ<span class="at">@冥界の女王</span></h2>
+					<p>崇高な存在に策略など不要</p>
+					<p>下僕たちは大人しく糧となりなさい</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/028.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>おらはコーへー<span class="at">@勇者</span></h2>
+					<p>やっと目覚めた平和の申し子</p>
+					<p>勇気の一発で世界を取り戻す</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<div class="team-logo">
+					<img src="/img/036.png" alt="チームロゴ">
+				</div>
+				<div class="team-text">
+					<h2>キョロ<span class="at">@封印されし存在</span></h2>
+					<p>手を暗刻に染め上げることに躊躇い無し</p>
+					<p>一筋の光なんてものはこの手にいらない</p>
+				</div>
+			</div>
+		</section>
+
+		<div class="top-title">
+			<h1>EDIT PLAYER</h1>
+			<h3>登録 / 編集 / 削除</h3>
+		</div>
+
 		<div th:each="p : ${players}" class="player-card">
 			<img th:src="${p.iconPath != null ? p.iconPath : '/images/default.png'}">
 			<div class="player-card-content">
