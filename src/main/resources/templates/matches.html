@@ -55,14 +55,14 @@
 
 		<section th:each="m : ${matches}" class="match-card">
 			<a th:href="@{'/matches/' + ${m.id}}" class="match-link">
-				<div class="match-title" th:classappend="${#lists.size(resultMap[m.id]) > 0} ? ' is-completed'"
+				<div class="match-title" th:classappend="${resultMap[m.id] != null && #lists.size(resultMap[m.id]) > 0} ? ' is-completed'"
 					th:text="'第' + ${m.matchNumber} + '回戦'">
 				</div>
 			</a>
 
 			<div th:each="mp : ${playerMap[m.id]}" class="match-player-row">
 				<div class="match-player-rank">
-					<span th:if="${#lists.size(resultMap[m.id]) == 0}">-</span>
+					<span th:if="${resultMap[m.id] == null || #lists.size(resultMap[m.id]) == 0}">-</span>
 					<span th:each="r : ${resultMap[m.id]}" th:if="${r.player.id == mp.player.id}"
 						th:text="${r.rankOrder}"></span>
 				</div>
