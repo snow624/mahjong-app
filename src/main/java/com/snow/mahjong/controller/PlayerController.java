@@ -6,6 +6,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -90,7 +92,12 @@ public class PlayerController {
 	 * - 新しく選手を登録するためのフォーム画面を表示する
 	 */
 	@GetMapping("/players/new")
-	public String createForm(Model model) {
+	public String createForm(HttpSession session, Model model) {
+
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
 		model.addAttribute("player", new Player());
 		return "player_form";
 	}
@@ -107,7 +114,12 @@ public class PlayerController {
 	 * - 画像は編集画面から登録する
 	 */
 	@PostMapping("/players")
-	public String create(Player player) {
+	public String create(Player player, HttpSession session) {
+
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
 		playerRepository.save(player);
 		return "redirect:/players";
 	}

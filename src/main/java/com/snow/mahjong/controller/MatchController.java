@@ -161,7 +161,15 @@ public class MatchController {
 	 * - 点数入力フォームを表示する
 	 */
 	@GetMapping("/matches/{id}")
-	public String detail(@PathVariable Long id, Model model) {
+	public String detail(
+			@PathVariable Long id,
+			HttpSession session,
+			Model model) {
+
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
+
 		Match match = matchRepository.findById(id).orElse(null);
 		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdWithPlayer(id);
 		List<MatchResult> results = matchResultRepository.findByMatchId(id);
@@ -474,7 +482,12 @@ public class MatchController {
 			@RequestParam Long matchId,
 			@RequestParam List<Long> playerIds,
 			@RequestParam List<Integer> scores,
+			HttpSession session,
 			Model model) {
+
+		if (!Boolean.TRUE.equals(session.getAttribute("adminLogin"))) {
+			return "redirect:/matches/admin/login";
+		}
 
 		int total = scores.stream().mapToInt(Integer::intValue).sum();
 

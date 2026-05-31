@@ -29,7 +29,6 @@
 				はりきってアプリまで作りました。
 				<br>
 				・対戦テーブルは「試合一覧」画面から確認できます。<br>
-				・試合終了後は、試合タイトルを押すと点数入力ができます。<br>
 				・スコアブックにも点数の記載をお願いします。<br>
 				・ランキングはアプリ上で確認できます。<br>
 				不具合あれば教えてください。。
@@ -57,16 +56,17 @@
 			</div>
 
 			<div th:each="r, stat : ${pointRanking}" class="ranking-row">
-			<div class="rank-badge" th:text="${stat.index + 1}"></div>
+				<div class="rank-badge" th:text="${stat.index + 1}"></div>
 
-			<img class="player-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
+				<img class="player-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
 
-			<div class="player-name" th:text="${r.name}"></div>
+				<div class="player-name" th:text="${r.name}"></div>
 
-			<div class="point" th:text="${T(java.lang.String).format('%.1f', r.point)} + 'pt'"></div>
+				<div class="point" th:text="${T(java.lang.String).format('%.1f', r.point)} + 'pt'"></div>
 
-			<div class="diff" th:text="${stat.index == 0 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
-			</div>
+				<div class="diff"
+					th:text="${stat.index == 0 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
+				</div>
 
 				<div class="games" th:text="${r.games} + '/' + ${targetGamesPerPlayer}"></div>
 			</div>
@@ -119,8 +119,9 @@
 
 					<div class="sub-ranking-name" th:text="${r.name}"></div>
 
-				<div class="sub-ranking-value" th:text="${T(java.lang.String).format('%.1f', r.avoidLastRate)} + '%'">
-				</div>
+					<div class="sub-ranking-value"
+						th:text="${T(java.lang.String).format('%.1f', r.avoidLastRate)} + '%'">
+					</div>
 				</div>
 			</div>
 
