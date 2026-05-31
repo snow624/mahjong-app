@@ -163,11 +163,12 @@ public class MatchController {
 	@GetMapping("/matches/{id}")
 	public String detail(@PathVariable Long id, Model model) {
 		Match match = matchRepository.findById(id).orElse(null);
-		// JOIN FETCHで最適化済みクエリを使用
 		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdWithPlayer(id);
+		List<MatchResult> results = matchResultRepository.findByMatchId(id);
 
 		model.addAttribute("match", match);
 		model.addAttribute("players", players);
+		model.addAttribute("results", results);
 
 		return "match_detail";
 	}
@@ -466,7 +467,7 @@ public class MatchController {
 	 * - 合計が100000点かチェックする
 	 * - 順位を計算する
 	 * - ウマ込みのポイントを計算する（Mリーグと同様に10-30で設定）
-	 * - オカ（30000返し）の+20pt分を加算する
+	 * - １位にはオカ（30000返し）の+20pt分を加算する
 	 */
 	@PostMapping("/matches/result")
 	public String saveResult(
@@ -552,8 +553,10 @@ public class MatchController {
 	private void setMatchDetailInfo(Long matchId, Model model) {
 		Match match = matchRepository.findById(matchId).orElse(null);
 		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdOrderBySeatOrder(matchId);
+		List<MatchResult> results = matchResultRepository.findByMatchId(matchId);
 
 		model.addAttribute("match", match);
 		model.addAttribute("players", players);
+		model.addAttribute("results", results);
 	}
 }
