@@ -38,30 +38,29 @@
 
 			<input type="hidden" name="matchId" th:value="${match.id}">
 
-		<!-- プレイヤーごとの点数入力 -->
-		<div th:each="mp, stat : ${players}" class="score-player-card">
+			<!-- プレイヤーごとの点数入力 -->
+			<div th:each="mp, stat : ${players}" class="score-player-card">
 
-			<div class="score-player-info">
-				<div class="score-seat" th:text="${stat.index + 1}"></div>
+				<div class="score-player-info">
+					<div class="score-seat" th:text="${stat.index + 1}"></div>
 
-				<img class="score-player-icon"
-					th:src="${mp.player.iconPath != null ? mp.player.iconPath : '/images/default.png'}">
+					<img class="score-player-icon"
+						th:src="${mp.player.iconPath != null ? mp.player.iconPath : '/images/default.png'}">
 
-				<div class="score-player-name" th:text="${mp.player.name}"></div>
+					<div class="score-player-name" th:text="${mp.player.name}"></div>
+				</div>
+
+				<div class="score-input-wrap">
+					<button type="button" class="score-minus-button">−</button>
+
+					<!-- 既存の点数結果があれば初期値として表示 -->
+					<input type="text" name="scores" class="score-input" placeholder="25000" inputmode="numeric"
+						pattern="-?[0-9]*">
+
+					<input type="hidden" name="playerIds" th:value="${mp.player.id}">
+				</div>
+
 			</div>
-
-			<div class="score-input-wrap">
-				<button type="button" class="score-minus-button">−</button>
-
-				<!-- 既存の点数結果があれば初期値として表示 -->
-				<input type="text" name="scores" class="score-input" placeholder="25000" inputmode="numeric"
-					pattern="-?[0-9]*"
-					th:value="${#lists.find(results, r -> r.player.id == mp.player.id) ? #lists.find(results, r -> r.player.id == mp.player.id).score : ''}">
-
-				<input type="hidden" name="playerIds" th:value="${mp.player.id}">
-			</div>
-
-		</div>
 
 			<button type="submit" class="primary-button">
 				保存
