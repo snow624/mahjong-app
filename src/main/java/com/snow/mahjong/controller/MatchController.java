@@ -159,15 +159,18 @@ public class MatchController {
 	 * - 1試合分の詳細を表示する
 	 * - その試合の4人を表示する
 	 * - 点数入力フォームを表示する
+	 * - 既存の点数結果があれば表示する
 	 */
 	@GetMapping("/matches/{id}")
 	public String detail(@PathVariable Long id, Model model) {
 		Match match = matchRepository.findById(id).orElse(null);
 		// JOIN FETCHで最適化済みクエリを使用
 		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdWithPlayer(id);
+		List<MatchResult> results = matchResultRepository.findByMatchId(id);
 
 		model.addAttribute("match", match);
 		model.addAttribute("players", players);
+		model.addAttribute("results", results);
 
 		return "match_detail";
 	}
