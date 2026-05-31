@@ -57,16 +57,16 @@
 			</div>
 
 			<div th:each="r, stat : ${pointRanking}" class="ranking-row">
-				<div class="rank-badge" th:text="${stat.index + 1}"></div>
+			<div class="rank-badge" th:text="${stat.index + 1}"></div>
 
-				<img class="player-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
+			<img class="player-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
 
-				<div class="player-name" th:text="${r.name}"></div>
+			<div class="player-name" th:text="${r.name}"></div>
 
-				<div class="point" th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'"></div>
+			<div class="point" th:text="${T(java.lang.String).format('%.1f', r.point)} + 'pt'"></div>
 
-				<div class="diff" th:text="${stat.index == 0 ? '—' : #numbers.formatDecimal(r.diff, 1, 1) + 'pt'}">
-				</div>
+			<div class="diff" th:text="${stat.index == 0 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
+			</div>
 
 				<div class="games" th:text="${r.games} + '/' + ${targetGamesPerPlayer}"></div>
 			</div>
@@ -119,8 +119,8 @@
 
 					<div class="sub-ranking-name" th:text="${r.name}"></div>
 
-					<div class="sub-ranking-value" th:text="${#numbers.formatDecimal(r.avoidLastRate, 1, 1)} + '%'">
-					</div>
+				<div class="sub-ranking-value" th:text="${T(java.lang.String).format('%.1f', r.avoidLastRate)} + '%'">
+				</div>
 				</div>
 			</div>
 
