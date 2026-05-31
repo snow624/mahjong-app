@@ -466,6 +466,7 @@ public class MatchController {
 	 * - 合計が100000点かチェックする
 	 * - 順位を計算する
 	 * - ウマ込みのポイントを計算する（Mリーグと同様に10-30で設定）
+	 * - オカ（30000返し）の+20pt分を加算する
 	 */
 	@PostMapping("/matches/result")
 	public String saveResult(
@@ -505,7 +506,7 @@ public class MatchController {
 			};
 
 			double point = (score - 30000) / 1000.0 + uma;
-			
+
 			// 1位にはオカ（30000返し）の+20pt分を追加
 			if (rank == 1) {
 				point += 20;
