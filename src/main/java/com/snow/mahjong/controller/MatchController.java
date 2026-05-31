@@ -505,6 +505,11 @@ public class MatchController {
 			};
 
 			double point = (score - 30000) / 1000.0 + uma;
+			
+			// 1位にはオカ（30000返し）の+20pt分を追加
+			if (rank == 1) {
+				point += 20;
+			}
 
 			MatchResult matchResult = new MatchResult();
 			matchResult.setMatch(match);
