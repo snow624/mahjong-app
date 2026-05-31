@@ -79,7 +79,7 @@
 						<div class="match-player-score" th:text="${r.score} + '点'">
 						</div>
 
-						<div class="match-player-point" th:text="${#numbers.formatDecimal(r.point, 1, 1)} + 'pt'">
+						<div class="match-player-point" th:text="${#numbers.formatDecimal(r.point, '0.0')} + 'pt'">
 						</div>
 					</div>
 				</div>
