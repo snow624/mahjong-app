@@ -28,7 +28,6 @@ import com.snow.mahjong.repository.MatchPlayerRepository;
 import com.snow.mahjong.repository.MatchRepository;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
-import org.springframework.beans.factory.annotation.Value;
 
 @Controller
 public class MatchController {
@@ -304,10 +303,10 @@ public class MatchController {
 		List<MatchPlayer> allMatchPlayers = matchPlayerRepository.findAllWithPlayer();
 		Map<Long, List<MatchPlayer>> matchPlayerMap = new HashMap<>();
 		Set<Set<Long>> usedCombinations = new HashSet<>();
-		
+
 		for (MatchPlayer mp : allMatchPlayers) {
 			matchPlayerMap.computeIfAbsent(mp.getMatch().getId(), k -> new ArrayList<>()).add(mp);
-			
+
 			// 既に対戦済みの組み合わせを記録
 			List<MatchPlayer> matchPlayers = matchPlayerMap.get(mp.getMatch().getId());
 			if (matchPlayers.size() == PLAYERS_PER_MATCH) {
@@ -340,7 +339,7 @@ public class MatchController {
 
 				playCount.put(player.getId(), playCount.get(player.getId()) + 1);
 			}
-			
+
 			// 新規選出された組み合わせを記録
 			Set<Long> newCombination = new HashSet<>();
 			for (Player player : selectedPlayers) {
@@ -364,11 +363,11 @@ public class MatchController {
 			List<Player> allPlayers,
 			Map<Long, Integer> playCount,
 			Set<Set<Long>> usedCombinations) {
-		
+
 		// 出場回数でソート（少ない順）
 		List<Player> sortedPlayers = new ArrayList<>(allPlayers);
 		sortedPlayers.sort(Comparator.comparing(player -> playCount.get(player.getId())));
-		
+
 		// 最も出場回数が少ないプレイヤーから始める
 		int maxAttempts = allPlayers.size() * PLAYERS_PER_MATCH;
 		int attempts = 0;
@@ -377,15 +376,15 @@ public class MatchController {
 			// ランダムに基軸プレイヤーを選ぶ（毎回異なる組み合わせを目指す）
 			Collections.shuffle(sortedPlayers);
 			List<Player> candidates = new ArrayList<>(sortedPlayers);
-			
+
 			// 出場回数が少ない順に再ソート
 			candidates.sort(Comparator.comparing(player -> playCount.get(player.getId())));
-			
+
 			// 基軸プレイヤーを選出
 			Player basePlayer = candidates.get(0);
 			List<Player> selected = new ArrayList<>();
 			selected.add(basePlayer);
-			
+
 			// 残りの3人を選ぶ
 			for (Player candidate : candidates) {
 				if (selected.size() >= PLAYERS_PER_MATCH) {
@@ -396,20 +395,20 @@ public class MatchController {
 				}
 				selected.add(candidate);
 			}
-			
+
 			// 選出した組み合わせが未使用かチェック
 			Set<Long> combination = new HashSet<>();
 			for (Player player : selected) {
 				combination.add(player.getId());
 			}
-			
+
 			if (!usedCombinations.contains(combination)) {
 				return selected;
 			}
-			
+
 			attempts++;
 		}
-		
+
 		// 最終手段：最も出場回数が少ない4人を選ぶ
 		List<Player> fallback = new ArrayList<>(sortedPlayers);
 		fallback.sort(Comparator.comparing(player -> playCount.get(player.getId())));
@@ -466,7 +465,7 @@ public class MatchController {
 	 * - 各プレイヤーの素点を保存する
 	 * - 合計が100000点かチェックする
 	 * - 順位を計算する
-	 * - ウマ込みのポイントを計算する
+	 * - ウマ込みのポイントを計算する（Mリーグと同様に10-30で設定）
 	 */
 	@PostMapping("/matches/result")
 	public String saveResult(
@@ -498,10 +497,10 @@ public class MatchController {
 			int rank = sortedScores.indexOf(score) + 1;
 
 			double uma = switch (rank) {
-			case 1 -> 10;
-			case 2 -> 5;
-			case 3 -> -5;
-			case 4 -> -10;
+			case 1 -> 30;
+			case 2 -> 10;
+			case 3 -> -10;
+			case 4 -> -30;
 			default -> 0;
 			};
 
