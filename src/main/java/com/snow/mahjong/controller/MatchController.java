@@ -497,7 +497,7 @@ public class MatchController {
 			int rank = sortedScores.indexOf(score) + 1;
 
 			double uma = switch (rank) {
-			case 1 -> 30;
+			case 1 -> 50;
 			case 2 -> 10;
 			case 3 -> -10;
 			case 4 -> -30;
