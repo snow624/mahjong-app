@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.snow.mahjong.entity.Match;
 import com.snow.mahjong.entity.MatchResult;
 import com.snow.mahjong.entity.Player;
 import com.snow.mahjong.repository.MatchRepository;
@@ -28,7 +26,7 @@ import com.snow.mahjong.repository.PlayerRepository;
  * - 最高スコアを集計する
  * - トップ回数を集計する
  * - 4着回避率を計算する
- * - 1位との差を計算する
+ * - 一つ上の上位とのポイント差を計算する
  * - メインランキング、最高スコアランキング、4着回避率ランキング、最多トップランキングを作る
  */
 @Controller
@@ -195,16 +193,22 @@ public class RankingController {
 				(Double) a.get("point")));
 
 		/*
-		 * 1位との差を計算する
+		 * 一つ上の順位の人との差を計算する
 		 *
 		 * 例:
 		 * 1位  120.0pt → 差 0.0
 		 * 2位  100.0pt → 差 20.0
+		 * 3位   80.0pt → 差 20.0
 		 */
-		double topPoint = (double) pointRanking.get(0).get("point");
-
-		for (Map<String, Object> rankingData : pointRanking) {
-			double diff = topPoint - (double) rankingData.get("point");
+		for (int i = 0; i < pointRanking.size(); i++) {
+			Map<String, Object> rankingData = pointRanking.get(i);
+			
+			double diff = 0.0;
+			if (i > 0) {
+				// 一つ上の順位の人との差を計算
+				double prevPoint = (double) pointRanking.get(i - 1).get("point");
+				diff = prevPoint - (double) rankingData.get("point");
+			}
 			rankingData.put("diff", diff);
 		}
 
