@@ -186,30 +186,47 @@ public class RankingController {
 		 *
 		 * 合計ポイントが高い順に並べる
 		 */
-		List<Map<String, Object>> pointRanking = new ArrayList<>(rankingList);
+		List<Map<String, Object>> pointRanking = new ArrayList<>();
+		for (Map<String, Object> data : rankingList) {
+			pointRanking.add(new HashMap<>(data));
+		}
 
 		pointRanking.sort((a, b) -> Double.compare(
 				(Double) b.get("point"),
 				(Double) a.get("point")));
 
 		/*
-		 * 一つ上の順位の人との差を計算する
+		 * 一つ上の順位の人との差を計算し、同率対応の順位を設定する
 		 *
 		 * 例:
 		 * 1位  120.0pt → 差 0.0
 		 * 2位  100.0pt → 差 20.0
-		 * 3位   80.0pt → 差 20.0
+		 * 2位   100.0pt → 差 0.0 (同率)
+		 * 4位   80.0pt → 差 20.0
 		 */
+		int rank = 1;
 		for (int i = 0; i < pointRanking.size(); i++) {
 			Map<String, Object> rankingData = pointRanking.get(i);
 			
-			double diff = 0.0;
+			// 同率かどうかを判定
 			if (i > 0) {
-				// 一つ上の順位の人との差を計算
 				double prevPoint = (double) pointRanking.get(i - 1).get("point");
-				diff = prevPoint - (double) rankingData.get("point");
+				double currentPoint = (double) rankingData.get("point");
+				
+				// ポイントが異なる場合は順位を進める
+				if (prevPoint != currentPoint) {
+					rank = i + 1;
+				}
+				// ポイントが同じ場合は順位を進めない（同率）
+				
+				// 一つ上の順位の人との差を計算
+				double diff = prevPoint - currentPoint;
+				rankingData.put("diff", diff);
+			} else {
+				rankingData.put("diff", 0.0);
 			}
-			rankingData.put("diff", diff);
+			
+			rankingData.put("rank", rank);
 		}
 
 		/*
@@ -217,33 +234,99 @@ public class RankingController {
 		 *
 		 * 最高スコアが高い順に並べる
 		 */
-		List<Map<String, Object>> maxScoreRanking = new ArrayList<>(rankingList);
+		List<Map<String, Object>> maxScoreRanking = new ArrayList<>();
+		for (Map<String, Object> data : rankingList) {
+			maxScoreRanking.add(new HashMap<>(data));
+		}
 
 		maxScoreRanking.sort((a, b) -> Integer.compare(
 				(Integer) b.get("maxScore"),
 				(Integer) a.get("maxScore")));
 
 		/*
+		 * 最高スコアランキングの順位を計算する
+		 */
+		rank = 1;
+		for (int i = 0; i < maxScoreRanking.size(); i++) {
+			Map<String, Object> rankingData = maxScoreRanking.get(i);
+			
+			if (i > 0) {
+				int prevScore = (Integer) maxScoreRanking.get(i - 1).get("maxScore");
+				int currentScore = (Integer) rankingData.get("maxScore");
+				
+				if (prevScore != currentScore) {
+					rank = i + 1;
+				}
+			}
+			
+			rankingData.put("rank", rank);
+		}
+
+		/*
 		 * 4着回避率ランキング
 		 *
 		 * 4着を回避した割合が高い順に並べる
 		 */
-		List<Map<String, Object>> avoidLastRanking = new ArrayList<>(rankingList);
+		List<Map<String, Object>> avoidLastRanking = new ArrayList<>();
+		for (Map<String, Object> data : rankingList) {
+			avoidLastRanking.add(new HashMap<>(data));
+		}
 
 		avoidLastRanking.sort((a, b) -> Double.compare(
 				(Double) b.get("avoidLastRate"),
 				(Double) a.get("avoidLastRate")));
 
 		/*
+		 * 4着回避率ランキングの順位を計算する
+		 */
+		rank = 1;
+		for (int i = 0; i < avoidLastRanking.size(); i++) {
+			Map<String, Object> rankingData = avoidLastRanking.get(i);
+			
+			if (i > 0) {
+				double prevRate = (Double) avoidLastRanking.get(i - 1).get("avoidLastRate");
+				double currentRate = (Double) rankingData.get("avoidLastRate");
+				
+				if (prevRate != currentRate) {
+					rank = i + 1;
+				}
+			}
+			
+			rankingData.put("rank", rank);
+		}
+
+		/*
 		 * 最多トップランキング
 		 *
 		 * 1位回数が多い順に並べる
 		 */
-		List<Map<String, Object>> topCountRanking = new ArrayList<>(rankingList);
+		List<Map<String, Object>> topCountRanking = new ArrayList<>();
+		for (Map<String, Object> data : rankingList) {
+			topCountRanking.add(new HashMap<>(data));
+		}
 
 		topCountRanking.sort((a, b) -> Integer.compare(
 				(Integer) b.get("topCount"),
 				(Integer) a.get("topCount")));
+
+		/*
+		 * 最多トップランキングの順位を計算する
+		 */
+		rank = 1;
+		for (int i = 0; i < topCountRanking.size(); i++) {
+			Map<String, Object> rankingData = topCountRanking.get(i);
+			
+			if (i > 0) {
+				int prevCount = (Integer) topCountRanking.get(i - 1).get("topCount");
+				int currentCount = (Integer) rankingData.get("topCount");
+				
+				if (prevCount != currentCount) {
+					rank = i + 1;
+				}
+			}
+			
+			rankingData.put("rank", rank);
+		}
 
 		/*
 		 * ranking.html に渡すデータ

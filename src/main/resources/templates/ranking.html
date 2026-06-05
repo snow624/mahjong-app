@@ -56,7 +56,7 @@
 			</div>
 
 			<div th:each="r, stat : ${pointRanking}" class="ranking-row">
-				<div class="rank-badge" th:text="${stat.index + 1}"></div>
+				<div class="rank-badge" th:text="${r.rank}"></div>
 
 				<img class="player-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
 
@@ -65,7 +65,7 @@
 				<div class="point" th:text="${T(java.lang.String).format('%.1f', r.point)} + 'pt'"></div>
 
 				<div class="diff"
-					th:text="${stat.index == 0 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
+					th:text="${r.rank == 1 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
 				</div>
 
 				<div class="games" th:text="${r.games} + '/' + ${targetGamesPerPlayer}"></div>
@@ -89,7 +89,7 @@
 				<div th:each="r, stat : ${maxScoreRanking}" class="sub-ranking-row"
 					th:classappend="${stat.index == 0} ? ' is-top'">
 
-					<div class="sub-ranking-rank" th:text="${stat.index + 1}"></div>
+					<div class="sub-ranking-rank" th:text="${r.rank}"></div>
 
 					<img class="sub-ranking-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
 
@@ -113,7 +113,7 @@
 				<div th:each="r, stat : ${avoidLastRanking}" class="sub-ranking-row"
 					th:classappend="${stat.index == 0} ? ' is-top'">
 
-					<div class="sub-ranking-rank" th:text="${stat.index + 1}"></div>
+					<div class="sub-ranking-rank" th:text="${r.rank}"></div>
 
 					<img class="sub-ranking-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
 
@@ -139,7 +139,7 @@
 				<div th:each="r, stat : ${topCountRanking}" class="sub-ranking-row"
 					th:classappend="${stat.index == 0} ? ' is-top'">
 
-					<div class="sub-ranking-rank" th:text="${stat.index + 1}"></div>
+					<div class="sub-ranking-rank" th:text="${r.rank}"></div>
 
 					<img class="sub-ranking-icon" th:src="${r.iconPath != null ? r.iconPath : '/images/default.png'}">
 
