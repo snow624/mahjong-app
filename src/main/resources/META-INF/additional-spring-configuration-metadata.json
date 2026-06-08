@@ -1,5 +1,12 @@
-{"properties": [{
-  "name": "app.upload.dir",
-  "type": "java.lang.String",
-  "description": "A description for 'app.upload.dir'"
-}]}
+{"properties": [
+  {
+    "name": "app.upload.dir",
+    "type": "java.lang.String",
+    "description": "A description for 'app.upload.dir'"
+  },
+  {
+    "name": "supabase.url",
+    "type": "java.lang.String",
+    "description": "A description for 'supabase.url'"
+  }
+]}

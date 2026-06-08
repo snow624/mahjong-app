@@ -37,6 +37,8 @@
 		<form action="/matches/result" method="post" class="score-form">
 
 			<input type="hidden" name="matchId" th:value="${match.id}">
+			<!-- LINE通知用サーバーURL -->
+			<input type="hidden" name="serverUrl" th:value="${serverUrl}">
 
 			<!-- プレイヤーごとの点数入力 -->
 			<div th:each="mp, stat : ${players}" class="score-player-card">

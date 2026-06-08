@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import com.snow.mahjong.repository.MatchPlayerRepository;
 import com.snow.mahjong.repository.MatchRepository;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
+import com.snow.mahjong.service.LineNotificationService;
 
 @Controller
 public class MatchController {
@@ -50,6 +52,8 @@ public class MatchController {
 	@Autowired
 	private MatchResultRepository matchResultRepository;
 
+	@Autowired
+	private LineNotificationService lineNotificationService;
 	// application.properties の app.admin.password を読み込む
 	@Value("${app.admin.password}")
 	private String adminPassword;
@@ -163,6 +167,7 @@ public class MatchController {
 	@GetMapping("/matches/{id}")
 	public String detail(
 			@PathVariable Long id,
+			HttpServletRequest request,
 			HttpSession session,
 			Model model) {
 
@@ -174,9 +179,13 @@ public class MatchController {
 		List<MatchPlayer> players = matchPlayerRepository.findByMatchIdWithPlayer(id);
 		List<MatchResult> results = matchResultRepository.findByMatchId(id);
 
+		// Build server URL for LINE notification
+		String serverUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+
 		model.addAttribute("match", match);
 		model.addAttribute("players", players);
 		model.addAttribute("results", results);
+		model.addAttribute("serverUrl", serverUrl);
 
 		return "match_detail";
 	}
@@ -482,6 +491,7 @@ public class MatchController {
 			@RequestParam Long matchId,
 			@RequestParam List<Long> playerIds,
 			@RequestParam List<Integer> scores,
+			@RequestParam(required = false) String serverUrl,
 			HttpSession session,
 			Model model) {
 
@@ -507,6 +517,9 @@ public class MatchController {
 		List<Integer> sortedScores = new ArrayList<>(scores);
 		sortedScores.sort(Collections.reverseOrder());
 
+		// LINE通知用の結果データを準備
+		List<Map<String, Object>> lineResults = new ArrayList<>();
+
 		for (int i = 0; i < playerIds.size(); i++) {
 			int score = scores.get(i);
 			int rank = sortedScores.indexOf(score) + 1;
@@ -523,15 +536,48 @@ public class MatchController {
 
 			MatchResult matchResult = new MatchResult();
 			matchResult.setMatch(match);
-			matchResult.setPlayer(playerRepository.findById(playerIds.get(i)).orElse(null));
+			Player player = playerRepository.findById(playerIds.get(i)).orElse(null);
+			matchResult.setPlayer(player);
 			matchResult.setScore(score);
 			matchResult.setRankOrder(rank);
 			matchResult.setPoint(point);
 
 			matchResultRepository.save(matchResult);
+
+			// LINE通知用データを追加
+			Map<String, Object> resultData = new HashMap<>();
+			resultData.put("rank", rank);
+			resultData.put("playerName", player != null ? player.getName() : "不明");
+			resultData.put("points", (int) point);
+			lineResults.add(resultData);
 		}
 
+		// LINE通知を送信（別スレッドで非同期実行）
+		sendLineNotificationAsync(match.getId(), lineResults, serverUrl);
+
 		return "redirect:/matches";
+	}
+
+	/**
+	 * LINE通知を非同期で送信
+	 */
+	private void sendLineNotificationAsync(Long matchId, List<Map<String, Object>> results, String serverUrl) {
+		new Thread(() -> {
+			try {
+				// ランキングURLを生成
+				String rankingUrl = (serverUrl != null && !serverUrl.isEmpty())
+					? serverUrl + "/ranking"
+					: "http://localhost:8080/ranking";
+
+				lineNotificationService.notifyMatchResult(
+					Math.toIntExact(matchId),
+					results,
+					rankingUrl
+				);
+			} catch (Exception e) {
+				System.err.println("LINE通知エラー: " + e.getMessage());
+			}
+		}).start();
 	}
 
 	/*
