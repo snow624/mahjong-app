@@ -1,9 +1,11 @@
 package com.snow.mahjong.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * LINEからのWebhook受信ハンドラー
@@ -13,13 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class LineWebhookController {
 
-    /**
-     * LINEからのWebhookイベント受信
-     * 現在は受信確認のみ（将来はここでBotからのメッセージ処理が可能）
-     */
-    @PostMapping("/callback")
-    public void handleWebhook(@RequestBody String body) {
-        log.debug("Webhook受信: {}", body);
-        // 現在は何もしない（将来のBotメッセージ受信に備えて予約）
-    }
+	/**
+	 * LINEからのWebhookイベント受信
+	 * 現在は受信確認のみ
+	 */
+	@PostMapping("/callback")
+	public ResponseEntity<String> handleWebhook(@RequestBody String body) {
+		log.info("LINE Webhook受信: {}", body);
+
+		return ResponseEntity.ok("OK");
+	}
 }
