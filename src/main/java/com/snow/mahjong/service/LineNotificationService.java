@@ -1,12 +1,13 @@
 package com.snow.mahjong.service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * LINE通知サービス
@@ -16,97 +17,112 @@ import java.util.Map;
 @Service
 public class LineNotificationService {
 
-    @Value("${line.bot.channel-token:}")
-    private String channelToken;
+	@Value("${line.bot.channel-token:}")
+	private String channelToken;
 
-    @Value("${line.bot.group-id:}")
-    private String groupId;
+	@Value("${line.bot.group-id:}")
+	private String groupId;
 
-    private final WebClient webClient;
+	private final WebClient webClient;
 
-    public LineNotificationService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://api.line.me").build();
-    }
+	public LineNotificationService(WebClient.Builder webClientBuilder) {
+		this.webClient = webClientBuilder.baseUrl("https://api.line.me").build();
+	}
 
-    /**
-     * 試合結果をLINEグループに通知
-     * 
-     * @param matchNumber 試合番号
-     * @param results ランキング結果 [{"rank": 1, "playerName": "太郎", "points": 50}, ...]
-     * @param rankingUrl ランキングページのURL
-     */
-    public void notifyMatchResult(int matchNumber, List<Map<String, Object>> results, String rankingUrl) {
-        if (channelToken.isEmpty() || groupId.isEmpty()) {
-            log.warn("LINE Bot設定が不完全です。通知をスキップします。");
-            return;
-        }
+	/**
+	 * 試合結果をLINEグループに通知
+	 * 
+	 * @param matchNumber 試合番号
+	 * @param results ランキング結果 [{"rank": 1, "playerName": "太郎", "points": 50}, ...]
+	 * @param rankingUrl ランキングページのURL
+	 */
+	public void notifyMatchResult(int matchNumber, List<Map<String, Object>> results, String rankingUrl) {
+		if (channelToken.isEmpty() || groupId.isEmpty()) {
+			log.warn("LINE Bot設定が不完全です。通知をスキップします。");
+			return;
+		}
 
-        try {
-            String message = buildMatchResultMessage(matchNumber, results, rankingUrl);
-            sendLineMessage(message);
-            log.info("LINE通知完了: 第{}試合", matchNumber);
-        } catch (Exception e) {
-            log.error("LINE通知エラー", e);
-        }
-    }
+		try {
+			String message = buildMatchResultMessage(matchNumber, results, rankingUrl);
+			sendLineMessage(message);
+			log.info("LINE通知完了: 第{}試合", matchNumber);
+		} catch (Exception e) {
+			log.error("LINE通知エラー", e);
+		}
+	}
 
-    /**
-     * メッセージを構築
-     */
-    private String buildMatchResultMessage(int matchNumber, List<Map<String, Object>> results, String rankingUrl) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("第").append(matchNumber).append("試合の結果が入力されました！\n\n");
+	/**
+	 * メッセージを構築
+	 */
+	private String buildMatchResultMessage(int matchNumber, List<Map<String, Object>> results, String rankingUrl) {
+		StringBuilder sb = new StringBuilder();
 
-        // ランキング情報
-        for (Map<String, Object> result : results) {
-            int rank = (int) result.get("rank");
-            String playerName = (String) result.get("playerName");
-            int points = (int) result.get("points");
+		sb.append("【K.LEAGUE】️\n");
+		sb.append("🀄️💖 試合結果が入力されました！ 💖🀄️\n\n");
 
-            sb.append(rank).append("位 ").append(playerName).append(" ");
-            if (points > 0) {
-                sb.append("+");
-            }
-            sb.append(points).append("pt\n");
-        }
+		results.stream()
+				.sorted((a, b) -> Integer.compare((int) a.get("rank"), (int) b.get("rank")))
+				.forEach(result -> {
+					int rank = (int) result.get("rank");
+					String playerName = (String) result.get("playerName");
+					int points = (int) result.get("points");
 
-        sb.append("\n現在のランキングはこちら↓\n");
-        sb.append(rankingUrl);
+					String rankIcon = switch (rank) {
+					case 1 -> "🥇";
+					case 2 -> "🥈";
+					case 3 -> "🥉";
+					case 4 -> "💜";
+					default -> "🀄";
+					};
 
-        return sb.toString();
-    }
+					sb.append(rankIcon)
+							.append(" ")
+							.append(rank)
+							.append("位 ")
+							.append(playerName)
+							.append(" ");
 
-    /**
-     * LINE Messaging APIでメッセージを送信
-     */
-    private void sendLineMessage(String messageText) {
-        String url = "/v2/bot/message/push";
+					if (points > 0) {
+						sb.append("+");
+					}
 
-        Map<String, Object> requestBody = Map.of(
-            "to", groupId,
-            "messages", List.of(
-                Map.of(
-                    "type", "text",
-                    "text", messageText
-                )
-            )
-        );
+					sb.append(points).append("pt\n");
+				});
 
-        webClient.post()
-            .uri(url)
-            .header("Authorization", "Bearer " + channelToken)
-            .header("Content-Type", "application/json")
-            .bodyValue(requestBody)
-            .retrieve()
-            .toBodilessEntity()
-            .doOnError(e -> log.error("LINE API呼び出しエラー", e))
-            .block();
-    }
+		sb.append("\n🩵👑 現在のランキングはこちら👇 👑🩵\n");
+		sb.append(rankingUrl);
 
-    /**
-     * テスト用: 簡単なメッセージを送信
-     */
-    public void sendTestMessage() {
-        sendLineMessage("🧪 テストメッセージです。LINE Bot接続テスト成功！");
-    }
+		return sb.toString();
+	}
+
+	/**
+	 * LINE Messaging APIでメッセージを送信
+	 */
+	private void sendLineMessage(String messageText) {
+		String url = "/v2/bot/message/push";
+
+		Map<String, Object> requestBody = Map.of(
+				"to", groupId,
+				"messages", List.of(
+						Map.of(
+								"type", "text",
+								"text", messageText)));
+
+		webClient.post()
+				.uri(url)
+				.header("Authorization", "Bearer " + channelToken)
+				.header("Content-Type", "application/json")
+				.bodyValue(requestBody)
+				.retrieve()
+				.toBodilessEntity()
+				.doOnError(e -> log.error("LINE API呼び出しエラー", e))
+				.block();
+	}
+
+	/**
+	 * テスト用: 簡単なメッセージを送信
+	 */
+	public void sendTestMessage() {
+		sendLineMessage("🧪 テストメッセージです。LINE Bot接続テスト成功！");
+	}
 }
