@@ -57,8 +57,8 @@ public class LineNotificationService {
 	private String buildMatchResultMessage(int matchNumber, List<Map<String, Object>> results, String rankingUrl) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("【K.LEAGUE】️\n");
-		sb.append("🀄️💖 試合結果が入力されました！ 💖🀄️\n\n");
+		sb.append("【 ---🀄️💖K.LEAGUE💖🀄--- 】️\n");
+		sb.append("試合結果が入力されたぞう！\n\n");
 
 		results.stream()
 				.sorted((a, b) -> Integer.compare((int) a.get("rank"), (int) b.get("rank")))
@@ -89,7 +89,7 @@ public class LineNotificationService {
 					sb.append(points).append("pt\n");
 				});
 
-		sb.append("\n🩵👑 現在のランキングはこちら👇 👑🩵\n");
+		sb.append("\n🩵👑 現在のランキングを確認 👑🩵\n");
 		sb.append(rankingUrl);
 
 		return sb.toString();
