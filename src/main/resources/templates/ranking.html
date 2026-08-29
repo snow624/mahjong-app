@@ -18,7 +18,7 @@
 <body>
 	<main class="page-container">
 		<div class="logo-container">
-			<img src="/img/MAHJONG.png" alt="MAHJONG" class="logo">
+			<img src="/img/MAHJONG.png" alt="MAHJONG" class="logo floating-cloud">
 		</div>
 		<div class="league-info">
 			<h2>What is K.LEAGUE</h2>
@@ -64,8 +64,7 @@
 
 				<div class="point" th:text="${T(java.lang.String).format('%.1f', r.point)} + 'pt'"></div>
 
-				<div class="diff"
-					th:text="${r.rank == 1 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
+				<div class="diff" th:text="${r.rank == 1 ? '—' : T(java.lang.String).format('%.1f', r.diff) + 'pt'}">
 				</div>
 
 				<div class="games" th:text="${r.games} + '/' + ${targetGamesPerPlayer}"></div>

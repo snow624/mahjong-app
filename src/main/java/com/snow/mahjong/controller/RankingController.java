@@ -40,7 +40,7 @@ public class RankingController {
 
 	@Autowired
 	private MatchRepository matchRepository;
-	
+
 	/*
 	 * ランキング画面
 	 * URL: /ranking
@@ -132,6 +132,7 @@ public class RankingController {
 						playerId,
 						avoidLastCountMap.get(playerId) + 1);
 			}
+
 		}
 
 		/*
@@ -207,25 +208,25 @@ public class RankingController {
 		int rank = 1;
 		for (int i = 0; i < pointRanking.size(); i++) {
 			Map<String, Object> rankingData = pointRanking.get(i);
-			
+
 			// 同率かどうかを判定
 			if (i > 0) {
 				double prevPoint = (double) pointRanking.get(i - 1).get("point");
 				double currentPoint = (double) rankingData.get("point");
-				
+
 				// ポイントが異なる場合は順位を進める
 				if (prevPoint != currentPoint) {
 					rank = i + 1;
 				}
 				// ポイントが同じ場合は順位を進めない（同率）
-				
+
 				// 一つ上の順位の人との差を計算
 				double diff = prevPoint - currentPoint;
 				rankingData.put("diff", diff);
 			} else {
 				rankingData.put("diff", 0.0);
 			}
-			
+
 			rankingData.put("rank", rank);
 		}
 
@@ -249,16 +250,16 @@ public class RankingController {
 		rank = 1;
 		for (int i = 0; i < maxScoreRanking.size(); i++) {
 			Map<String, Object> rankingData = maxScoreRanking.get(i);
-			
+
 			if (i > 0) {
 				int prevScore = (Integer) maxScoreRanking.get(i - 1).get("maxScore");
 				int currentScore = (Integer) rankingData.get("maxScore");
-				
+
 				if (prevScore != currentScore) {
 					rank = i + 1;
 				}
 			}
-			
+
 			rankingData.put("rank", rank);
 		}
 
@@ -273,8 +274,8 @@ public class RankingController {
 		}
 
 		avoidLastRanking.sort((a, b) -> Double.compare(
-				(Double) b.get("avoidLastRate"),
-				(Double) a.get("avoidLastRate")));
+				(Double) a.get("avoidLastRate"),
+				(Double) b.get("avoidLastRate")));
 
 		/*
 		 * 4着回避率ランキングの順位を計算する
@@ -282,16 +283,16 @@ public class RankingController {
 		rank = 1;
 		for (int i = 0; i < avoidLastRanking.size(); i++) {
 			Map<String, Object> rankingData = avoidLastRanking.get(i);
-			
+
 			if (i > 0) {
 				double prevRate = (Double) avoidLastRanking.get(i - 1).get("avoidLastRate");
 				double currentRate = (Double) rankingData.get("avoidLastRate");
-				
+
 				if (prevRate != currentRate) {
 					rank = i + 1;
 				}
 			}
-			
+
 			rankingData.put("rank", rank);
 		}
 
@@ -315,16 +316,16 @@ public class RankingController {
 		rank = 1;
 		for (int i = 0; i < topCountRanking.size(); i++) {
 			Map<String, Object> rankingData = topCountRanking.get(i);
-			
+
 			if (i > 0) {
 				int prevCount = (Integer) topCountRanking.get(i - 1).get("topCount");
 				int currentCount = (Integer) rankingData.get("topCount");
-				
+
 				if (prevCount != currentCount) {
 					rank = i + 1;
 				}
 			}
-			
+
 			rankingData.put("rank", rank);
 		}
 
