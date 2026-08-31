@@ -521,12 +521,30 @@ tr:hover {
 .player-card-content {
 	flex: 1;
 	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
 }
 
 .player-card-name {
 	flex: 1;
 	font-size: 14px;
 	font-weight: 700;
+}
+
+.player-card-actions {
+	margin-top: 10px;
+}
+
+.player-history-tab {
+	border: none;
+	background: #eafaf1;
+	color: #087233;
+	border-radius: 999px;
+	padding: 6px 10px;
+	font-size: 12px;
+	font-weight: 700;
+	cursor: pointer;
 }
 
 .player-card-edit {
@@ -1230,113 +1248,4 @@ tr:hover {
 
 .filter-reset-button:hover {
 	background-color: #555;
-}
-
-/* プレイヤー履歴タブボタン */
-.player-history-tab {
-	margin-top: 8px;
-	padding: 6px 12px;
-	background-color: #007bff;
-	color: white;
-	border: none;
-	border-radius: 6px;
-	font-size: 0.85rem;
-	cursor: pointer;
-	transition: background-color 0.2s;
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-}
-
-.player-history-tab:hover {
-	background-color: #0056b3;
-}
-
-/* プレイヤー履歴モーダル */
-.player-history-modal {
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(0, 0, 0, 0.5);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 9999;
-}
-
-.player-history-modal-content {
-	background: white;
-	border-radius: 12px;
-	padding: 24px;
-	width: 90%;
-	max-width: 900px;
-	max-height: 90vh;
-	overflow-y: auto;
-	position: relative;
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-}
-
-.player-history-close {
-	position: absolute;
-	top: 16px;
-	right: 16px;
-	background: none;
-	border: none;
-	font-size: 24px;
-	cursor: pointer;
-	color: #666;
-	transition: color 0.2s;
-}
-
-.player-history-close:hover {
-	color: #333;
-}
-
-.player-history-modal-content h2 {
-	margin-top: 0;
-	margin-bottom: 24px;
-	color: #333;
-}
-
-/* グラフコンテナ */
-.player-history-charts {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 24px;
-}
-
-.player-history-chart-container {
-	background-color: #f8f9fa;
-	border-radius: 8px;
-	padding: 16px;
-}
-
-.player-history-chart-container h3 {
-	margin-top: 0;
-	margin-bottom: 16px;
-	color: #333;
-	font-size: 1.1rem;
-}
-
-.player-history-chart-container canvas {
-	max-height: 300px;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-	.player-history-modal-content {
-		width: 95%;
-		padding: 16px;
-	}
-
-	.player-history-charts {
-		grid-template-columns: 1fr;
-		gap: 16px;
-	}
-
-	.player-history-chart-container {
-		padding: 12px;
-	}
 }

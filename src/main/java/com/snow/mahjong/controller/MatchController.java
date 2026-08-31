@@ -11,6 +11,7 @@ import java.util.Set;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,7 +71,7 @@ public class MatchController {
 	 *
 	 * クエリパラメータ:
 	 * - playerIds: カンマ区切りのプレイヤーID（複数選択可能）
-	 *   例: /matches?playerIds=1,2,5
+	 * 例: /matches?playerIds=1,2,5
 	 */
 	@GetMapping("/matches")
 	public String list(@RequestParam(required = false) String playerIds, Model model) {
@@ -487,6 +488,7 @@ public class MatchController {
 	 * - １位にはオカ（30000返し）の+20pt分を加算する
 	 */
 	@PostMapping("/matches/result")
+	@Transactional
 	public String saveResult(
 			@RequestParam Long matchId,
 			@RequestParam List<Long> playerIds,
@@ -525,11 +527,11 @@ public class MatchController {
 			int rank = sortedScores.indexOf(score) + 1;
 
 			double uma = switch (rank) {
-			case 1 -> 50;
-			case 2 -> 10;
-			case 3 -> -10;
-			case 4 -> -30;
-			default -> 0;
+				case 1 -> 50;
+				case 2 -> 10;
+				case 3 -> -10;
+				case 4 -> -30;
+				default -> 0;
 			};
 
 			double point = (score - 30000) / 1000.0 + uma;
@@ -566,14 +568,13 @@ public class MatchController {
 			try {
 				// ランキングURLを生成
 				String rankingUrl = (serverUrl != null && !serverUrl.isEmpty())
-					? serverUrl + "/ranking"
-					: "http://localhost:8080/ranking";
+						? serverUrl + "/ranking"
+						: "http://localhost:8080/ranking";
 
 				lineNotificationService.notifyMatchResult(
-					Math.toIntExact(matchId),
-					results,
-					rankingUrl
-				);
+						Math.toIntExact(matchId),
+						results,
+						rankingUrl);
 			} catch (Exception e) {
 				System.err.println("LINE通知エラー: " + e.getMessage());
 			}

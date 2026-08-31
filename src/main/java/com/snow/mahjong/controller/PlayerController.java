@@ -5,20 +5,29 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.snow.mahjong.entity.MatchResult;
 import com.snow.mahjong.entity.Player;
+import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
 
 /*
@@ -39,6 +48,9 @@ public class PlayerController {
 
 	@Autowired
 	private PlayerRepository playerRepository;
+
+	@Autowired
+	private MatchResultRepository matchResultRepository;
 
 	/*
 	 * 選手削除用の管理者パスワード
@@ -295,5 +307,66 @@ public class PlayerController {
 		playerRepository.deleteById(id);
 
 		return "redirect:/players";
+	}
+
+	/*
+	 * プレイヤー順位推移データ取得API
+	 * URL: /api/players/{playerId}/history
+	 *
+	 * 役割:
+	 * - 指定したプレイヤーの試合結果を時系列で取得する
+	 * - 各試合での順位とポイント数を返す
+	 * - グラフ表示用JSON形式で返す
+	 */
+	@GetMapping("/api/players/{playerId}/history")
+	public ResponseEntity<?> getPlayerHistory(@PathVariable Long playerId) {
+		Player player = playerRepository.findById(playerId).orElse(null);
+
+		if (player == null) {
+			return ResponseEntity.notFound().build();
+		}
+
+		List<MatchResult> results = matchResultRepository.findAllWithPlayer();
+
+		// 該当プレイヤーの結果をフィルタリング
+		List<MatchResult> playerResults = new ArrayList<>();
+		for (MatchResult result : results) {
+			if (result.getPlayer() != null && result.getPlayer().getId().equals(playerId)) {
+				playerResults.add(result);
+			}
+		}
+		playerResults.sort(Comparator.comparing(result -> result.getMatch() != null ? result.getMatch().getId() : 0L));
+
+		List<Map<String, Object>> historyData = new ArrayList<>();
+		double cumulativePoint = 0.0;
+
+		for (int i = 0; i < playerResults.size(); i++) {
+			MatchResult result = playerResults.get(i);
+			cumulativePoint += result.getPoint();
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("gameNumber", i + 1);
+			data.put("matchId", result.getMatch() != null ? result.getMatch().getId() : null);
+			data.put("matchNumber", result.getMatch() != null ? result.getMatch().getMatchNumber() : i + 1);
+			data.put("rankOrder", result.getRankOrder());
+			data.put("score", result.getScore());
+			data.put("point", result.getPoint());
+			data.put("cumulativePoint", cumulativePoint);
+
+			historyData.add(data);
+		}
+
+		int maxHistoryEntries = 6;
+		if (historyData.size() > maxHistoryEntries) {
+			historyData = new ArrayList<>(
+					historyData.subList(historyData.size() - maxHistoryEntries, historyData.size()));
+		}
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("playerName", player.getName());
+		response.put("playerId", player.getId());
+		response.put("history", historyData);
+
+		return ResponseEntity.ok(response);
 	}
 }

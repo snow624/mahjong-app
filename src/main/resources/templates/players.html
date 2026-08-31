@@ -11,7 +11,8 @@
 	<link rel="icon" type="image/x-icon" href="/img/favicon.ico" />
 	<!-- fontawesome -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-
+	<!-- Chart.js -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<title>プレイヤー一覧</title>
 </head>
 
@@ -96,24 +97,163 @@
 			</div>
 		</section>
 
-		<div class="top-title">
-			<h1>EDIT PLAYER</h1>
-			<h3>登録 / 編集 / 削除</h3>
+		<div id="playerHistoryModal" class="player-history-modal" style="display: none;">
+			<div class="player-history-modal-content">
+				<button class="player-history-close" onclick="closePlayerHistory()">
+					<i class="fas fa-times"></i>
+				</button>
+				<h2 id="playerHistoryTitle"></h2>
+				<div class="player-history-charts">
+					<div class="player-history-chart-container">
+						<h3>順位推移</h3>
+						<canvas id="rankChart"></canvas>
+					</div>
+					<div class="player-history-chart-container">
+						<h3>ポイント推移</h3>
+						<canvas id="pointChart"></canvas>
+					</div>
+				</div>
+			</div>
 		</div>
 
-		<div th:each="p : ${players}" class="player-card">
+		<div th:each="p : ${players}" class="player-card" th:attr="data-player-id=${p.id}">
 			<img th:src="${p.iconPath != null ? p.iconPath : '/images/default.png'}">
 			<div class="player-card-content">
 				<div class="player-card-name" th:text="${p.name}"></div>
+				<button class="player-history-tab" th:onclick="'togglePlayerHistory(' + ${p.id} + ')'">
+					<i class="fas fa-chart-line"></i> 詳細
+				</button>
 			</div>
 			<a class="player-card-edit" th:href="@{'/players/' + ${p.id} + '/edit'}">編集</a>
 			<a class="player-card-delete" th:href="@{'/players/' + ${p.id} + '/delete'}">削除</a>
+		</div>
+
+		<div class="top-title">
+			<h1>EDIT PLAYER</h1>
+			<h3>登録 / 編集 / 削除</h3>
 		</div>
 
 		<a href="/players/new" class="primary-link-button">新規登録</a>
 	</main>
 
 	<div th:replace="~{fragments/nav :: bottomNav}"></div>
+
+	<script>
+		let rankChartInstance = null;
+		let pointChartInstance = null;
+
+		async function togglePlayerHistory(playerId) {
+			const modal = document.getElementById("playerHistoryModal");
+
+			try {
+				const response = await fetch(`/api/players/${playerId}/history`);
+				if (!response.ok) {
+					alert("データを取得できませんでした");
+					return;
+				}
+
+				const data = await response.json();
+				const history = data.history || [];
+				const recent = history.slice(-6);
+				const gameNumbers = recent.map(item => `第${item.matchNumber ?? item.gameNumber}戦`);
+				const ranks = recent.map(h => Number(h.rankOrder));
+				const cumulativePoints = recent.map(h => Number(h.cumulativePoint));
+
+				modal.style.display = "flex";
+				document.getElementById("playerHistoryTitle").textContent = `${data.playerName}の推移`;
+
+				if (rankChartInstance) rankChartInstance.destroy();
+				if (pointChartInstance) pointChartInstance.destroy();
+
+				const rankCtx = document.getElementById("rankChart").getContext("2d");
+				rankChartInstance = new Chart(rankCtx, {
+					type: "line",
+					data: {
+						labels: gameNumbers,
+						datasets: [{
+							label: "順位",
+							data: ranks,
+							borderColor: "rgb(220, 53, 69)",
+							backgroundColor: "rgba(220, 53, 69, 0.1)",
+							fill: true,
+							tension: 0.4,
+							pointRadius: 4,
+							pointBackgroundColor: "rgb(220, 53, 69)",
+							pointBorderColor: "#fff",
+							pointBorderWidth: 2,
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: true,
+						plugins: { legend: { display: true } },
+						scales: {
+							y: {
+								reverse: true,
+								min: 1,
+								max: 4,
+								title: { display: true, text: "順位" },
+								ticks: { stepSize: 1 }
+							}
+						}
+					}
+				});
+
+				const pointCtx = document.getElementById("pointChart").getContext("2d");
+				pointChartInstance = new Chart(pointCtx, {
+					type: "line",
+					data: {
+						labels: gameNumbers,
+						datasets: [{
+							label: "累積ポイント",
+							data: cumulativePoints,
+							borderColor: "rgb(40, 167, 69)",
+							backgroundColor: "rgba(40, 167, 69, 0.1)",
+							fill: true,
+							tension: 0.4,
+							pointRadius: 4,
+							pointBackgroundColor: "rgb(40, 167, 69)",
+							pointBorderColor: "#fff",
+							pointBorderWidth: 2,
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: true,
+						plugins: { legend: { display: true } },
+						scales: {
+							y: { beginAtZero: true, title: { display: true, text: "ポイント" } }
+						}
+					}
+				});
+
+			} catch (error) {
+				console.error("エラー:", error);
+				alert("データ取得中にエラーが発生しました");
+			}
+		}
+
+		function closePlayerHistory() {
+			const modal = document.getElementById("playerHistoryModal");
+			modal.style.display = "none";
+
+			if (rankChartInstance) {
+				rankChartInstance.destroy();
+				rankChartInstance = null;
+			}
+			if (pointChartInstance) {
+				pointChartInstance.destroy();
+				pointChartInstance = null;
+			}
+		}
+
+		document.getElementById("playerHistoryModal").addEventListener("click", (e) => {
+			if (e.target.id === "playerHistoryModal") {
+				closePlayerHistory();
+			}
+		});
+	</script>
+
 </body>
 
 </html>

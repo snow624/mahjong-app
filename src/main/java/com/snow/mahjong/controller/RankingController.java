@@ -15,6 +15,7 @@ import com.snow.mahjong.entity.Player;
 import com.snow.mahjong.repository.MatchRepository;
 import com.snow.mahjong.repository.MatchResultRepository;
 import com.snow.mahjong.repository.PlayerRepository;
+import com.snow.mahjong.util.RankingSortUtils;
 
 /*
  * ランキング画面Controller
@@ -200,10 +201,10 @@ public class RankingController {
 		 * 一つ上の順位の人との差を計算し、同率対応の順位を設定する
 		 *
 		 * 例:
-		 * 1位  120.0pt → 差 0.0
-		 * 2位  100.0pt → 差 20.0
-		 * 2位   100.0pt → 差 0.0 (同率)
-		 * 4位   80.0pt → 差 20.0
+		 * 1位 120.0pt → 差 0.0
+		 * 2位 100.0pt → 差 20.0
+		 * 2位 100.0pt → 差 0.0 (同率)
+		 * 4位 80.0pt → 差 20.0
 		 */
 		int rank = 1;
 		for (int i = 0; i < pointRanking.size(); i++) {
@@ -273,28 +274,7 @@ public class RankingController {
 			avoidLastRanking.add(new HashMap<>(data));
 		}
 
-		avoidLastRanking.sort((a, b) -> Double.compare(
-				(Double) a.get("avoidLastRate"),
-				(Double) b.get("avoidLastRate")));
-
-		/*
-		 * 4着回避率ランキングの順位を計算する
-		 */
-		rank = 1;
-		for (int i = 0; i < avoidLastRanking.size(); i++) {
-			Map<String, Object> rankingData = avoidLastRanking.get(i);
-
-			if (i > 0) {
-				double prevRate = (Double) avoidLastRanking.get(i - 1).get("avoidLastRate");
-				double currentRate = (Double) rankingData.get("avoidLastRate");
-
-				if (prevRate != currentRate) {
-					rank = i + 1;
-				}
-			}
-
-			rankingData.put("rank", rank);
-		}
+		RankingSortUtils.sortAvoidLastRanking(avoidLastRanking);
 
 		/*
 		 * 最多トップランキング

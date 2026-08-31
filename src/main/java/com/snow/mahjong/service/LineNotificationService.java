@@ -2,6 +2,7 @@ package com.snow.mahjong.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class LineNotificationService {
 	private String groupId;
 
 	private final WebClient webClient;
+	private final Map<Integer, Long> lastNotificationAtByMatch = new ConcurrentHashMap<>();
 
 	public LineNotificationService(WebClient.Builder webClientBuilder) {
 		this.webClient = webClientBuilder.baseUrl("https://api.line.me").build();
@@ -33,8 +35,9 @@ public class LineNotificationService {
 	 * 試合結果をLINEグループに通知
 	 * 
 	 * @param matchNumber 試合番号
-	 * @param results ランキング結果 [{"rank": 1, "playerName": "太郎", "points": 50}, ...]
-	 * @param rankingUrl ランキングページのURL
+	 * @param results     ランキング結果 [{"rank": 1, "playerName": "太郎", "points": 50},
+	 *                    ...]
+	 * @param rankingUrl  ランキングページのURL
 	 */
 	public void notifyMatchResult(int matchNumber, List<Map<String, Object>> results, String rankingUrl) {
 		if (channelToken.isEmpty() || groupId.isEmpty()) {
@@ -42,9 +45,17 @@ public class LineNotificationService {
 			return;
 		}
 
+		long now = System.currentTimeMillis();
+		Long lastSentAt = lastNotificationAtByMatch.get(matchNumber);
+		if (lastSentAt != null && (now - lastSentAt) < 30000L) {
+			log.info("重複LINE通知を抑制: 第{}試合 ({}ms前)", matchNumber, now - lastSentAt);
+			return;
+		}
+
 		try {
 			String message = buildMatchResultMessage(matchNumber, results, rankingUrl);
 			sendLineMessage(message);
+			lastNotificationAtByMatch.put(matchNumber, now);
 			log.info("LINE通知完了: 第{}試合", matchNumber);
 		} catch (Exception e) {
 			log.error("LINE通知エラー", e);
@@ -68,11 +79,11 @@ public class LineNotificationService {
 					int points = (int) result.get("points");
 
 					String rankIcon = switch (rank) {
-					case 1 -> "🥇";
-					case 2 -> "🥈";
-					case 3 -> "🥉";
-					case 4 -> "💜";
-					default -> "🀄";
+						case 1 -> "🥇";
+						case 2 -> "🥈";
+						case 3 -> "🥉";
+						case 4 -> "💜";
+						default -> "🀄";
 					};
 
 					sb.append(rankIcon)
