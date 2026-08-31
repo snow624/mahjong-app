@@ -536,6 +536,73 @@ tr:hover {
 	margin-top: 10px;
 }
 
+.player-history-modal {
+	position: fixed;
+	inset: 0;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	background: rgba(17, 24, 39, 0.38);
+	z-index: 1000;
+	padding: 20px;
+}
+
+.player-history-modal-content {
+	position: relative;
+	width: min(92vw, 900px);
+	background: #f7f7f7;
+	border-radius: 18px;
+	padding: 26px 18px 18px;
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.player-history-close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	background: transparent;
+	border: none;
+	font-size: 20px;
+	color: #4b5563;
+	cursor: pointer;
+}
+
+.player-history-modal-content h2 {
+	font-size: 18px;
+	font-weight: 800;
+	margin: 0 0 16px;
+	text-align: center;
+	color: #111827;
+}
+
+.player-history-charts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	align-items: start;
+	width: 100%;
+}
+
+.player-history-chart-container {
+	text-align: center;
+	min-width: 0;
+}
+
+.player-history-chart-container h3 {
+	font-size: 13px;
+	font-weight: 700;
+	margin-bottom: 8px;
+	color: #111827;
+}
+
+.player-history-chart-container canvas {
+	display: block;
+	width: 100% !important;
+	height: 130px !important;
+	max-width: 100%;
+	margin: 0 auto;
+}
+
 .player-history-tab {
 	border: none;
 	background: #eafaf1;
